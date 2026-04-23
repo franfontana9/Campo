@@ -6,6 +6,9 @@ node_modules
 out
 next-env.d.ts
 
+# TS build cache
+*.tsbuildinfo
+
 # env
 .env
 .env.local
