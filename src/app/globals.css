@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand — verde olivo profundo, menos "hierba" y más "campo" */
+  --color-brand-50:  #f4f6ef;
+  --color-brand-100: #e5ebd8;
+  --color-brand-200: #cdd8b2;
+  --color-brand-300: #a8bc7f;
+  --color-brand-400: #839b57;
+  --color-brand-500: #657d3e;
+  --color-brand-600: #4f632f;
+  --color-brand-700: #3e4f26;
+  --color-brand-800: #323f20;
+  --color-brand-900: #25301a;
+
+  /* Ink — neutros cálidos, sutilmente teñidos */
+  --color-ink-50:  #f9f8f4;
+  --color-ink-100: #ececd9;
+  --color-ink-200: #d6d6c1;
+  --color-ink-300: #b4b49c;
+  --color-ink-400: #8a8a74;
+  --color-ink-500: #666656;
+  --color-ink-600: #4d4d42;
+  --color-ink-700: #3a3a32;
+  --color-ink-800: #272722;
+  --color-ink-900: #17170f;
+
+  /* Accent — terracota cálido para acentos puntuales */
+  --color-accent-50:  #fbf3ee;
+  --color-accent-100: #f4dfd1;
+  --color-accent-200: #e9bfa4;
+  --color-accent-300: #db9a77;
+  --color-accent-400: #c97b55;
+  --color-accent-500: #b66240;
+  --color-accent-600: #9b4d31;
+  --color-accent-700: #7c3d27;
+
+  /* Fuentes via next/font (definidas en layout.tsx) */
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-display), ui-serif, Georgia, "Times New Roman",
+    serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  color: var(--color-ink-900);
+  background: var(--color-ink-50);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+*::selection {
+  background: var(--color-brand-200);
+  color: var(--color-brand-900);
+}
+
+/* Custom <select> styling — evita el arbitrary-value de Tailwind */
+.select-campo {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-ink-200);
+  background-color: #fff;
+  padding: 0 2.5rem 0 0.875rem;
+  font-size: 0.875rem;
+  color: var(--color-ink-900);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'><path d='M2 4.5l4 3 4-3' stroke='%234d4d42' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px 12px;
+}
+.select-campo:focus {
+  outline: none;
+  border-color: var(--color-brand-600);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-brand-600) 10%, transparent);
+}
+.select-campo:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+/* Variante sobre fondo oscuro (hero) */
+.select-campo.on-dark {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-ink-50);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'><path d='M2 4.5l4 3 4-3' stroke='%23e5ebd8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+.select-campo.on-dark option {
+  background: #17170f;
+  color: var(--color-ink-50);
+}
+
+/* Font utility */
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variation-settings: "SOFT" 50;
+    letter-spacing: -0.01em;
+  }
+
+  /* Textura de grano sutil, para fondos oscuros / hero */
+  .texture-grain {
+    position: relative;
+  }
+  .texture-grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.08;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='2'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.7 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* Reveal al cargar la página */
+  .anim-fade-up {
+    animation: fadeUp 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .anim-delay-1 { animation-delay: 0.05s; }
+  .anim-delay-2 { animation-delay: 0.15s; }
+  .anim-delay-3 { animation-delay: 0.25s; }
+  .anim-delay-4 { animation-delay: 0.35s; }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
