@@ -53,6 +53,18 @@ export function Navbar() {
             Marketplace
           </Link>
           <Link
+            href="/precios"
+            className="text-ink-700 transition-colors hover:text-ink-900"
+          >
+            Precios
+          </Link>
+          <Link
+            href="/geografia"
+            className="text-ink-700 transition-colors hover:text-ink-900"
+          >
+            Geografía
+          </Link>
+          <Link
             href="/dashboard"
             className="text-ink-700 transition-colors hover:text-ink-900"
           >

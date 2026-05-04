@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, ShoppingBag, LayoutDashboard, PlusCircle, LogIn, UserPlus } from "lucide-react";
+import { Menu, ShoppingBag, LayoutDashboard, PlusCircle, LogIn, UserPlus, TrendingUp, MapPin } from "lucide-react";
 import { Drawer } from "@/components/ui/Drawer";
 
 export function MobileNav() {
@@ -25,6 +25,20 @@ export function MobileNav() {
             onClick={() => setOpen(false)}
           >
             Marketplace
+          </NavItem>
+          <NavItem
+            href="/precios"
+            icon={<TrendingUp className="h-4 w-4" />}
+            onClick={() => setOpen(false)}
+          >
+            Precios
+          </NavItem>
+          <NavItem
+            href="/geografia"
+            icon={<MapPin className="h-4 w-4" />}
+            onClick={() => setOpen(false)}
+          >
+            Geografía
           </NavItem>
           <NavItem
             href="/dashboard"
