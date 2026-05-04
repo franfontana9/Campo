@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -29,6 +30,29 @@ import { countryLabel, grainLabel } from "@/lib/constants";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { GrainVisual } from "@/components/listings/GrainVisual";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const listing = MOCK_LISTINGS.find((l) => l.id === id);
+  if (!listing) {
+    return { title: "Publicación no encontrada" };
+  }
+  const title = `${formatTonnage(listing.tonnage)} de ${grainLabel(
+    listing.grain_type,
+  ).toLowerCase()} · ${listing.city}`;
+  const desc = `${formatTonnage(listing.tonnage)} de ${grainLabel(
+    listing.grain_type,
+  ).toLowerCase()} en ${listing.city}, ${countryLabel(
+    listing.country,
+  )}. Entrega ${listing.delivery_date}. Vendedor: ${
+    listing.seller?.full_name ?? "—"
+  }.`;
+  return { title, description: desc };
+}
+
 export default async function ListingDetailPage({
   params,
 }: {
@@ -44,7 +68,7 @@ export default async function ListingDetailPage({
   const interests = mockInterestsCount(listing.id);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-6xl px-6 pb-24 pt-10 lg:pb-10">
       {/* Breadcrumb */}
       <nav className="mb-8 flex items-center gap-1.5 text-sm text-ink-500">
         <Link
@@ -287,6 +311,28 @@ export default async function ListingDetailPage({
             </ul>
           </div>
         </aside>
+      </div>
+
+      {/* Sticky CTA mobile — visible sólo en <lg, sale del flow */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink-100 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.15)] backdrop-blur-md lg:hidden">
+        <div className="mx-auto flex max-w-6xl items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-display text-xl font-medium text-ink-900">
+              {formatPrice(listing.price, listing.currency)}
+            </p>
+            <p className="truncate text-[11px] uppercase tracking-[0.14em] text-ink-500">
+              {listing.price_mode === "fixed" ? "Precio / t" : "A convenir"}
+              {" · "}
+              {formatTonnage(listing.tonnage)}
+            </p>
+          </div>
+          <a href="#message">
+            <Button size="lg" className="shrink-0">
+              <MessageSquare className="h-4 w-4" />
+              Me interesa
+            </Button>
+          </a>
+        </div>
       </div>
     </div>
   );

@@ -10,9 +10,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { GRAIN_TYPES } from "@/lib/constants";
+import { GrainVisual } from "@/components/listings/GrainVisual";
 import { ListingCard } from "@/components/listings/ListingCard";
+import { LiveTicker } from "@/components/listings/LiveTicker";
 import { MOCK_LISTINGS, getMarketplaceStats } from "@/lib/mock-data";
 import { timeAgo, formatTonnage } from "@/lib/utils";
+import { SplitHeadline } from "@/components/effects/SplitHeadline";
+import { Reveal } from "@/components/effects/Reveal";
 
 export default function HomePage() {
   const featured = MOCK_LISTINGS.filter((l) => l.status === "active").slice(0, 3);
@@ -20,51 +24,35 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Hero editorial ------------------------------------------------ */}
+      {/* Hero cinemático ------------------------------------------------ */}
       <section className="relative isolate overflow-hidden bg-ink-900 text-ink-50">
-        {/* Capa 1 — gradiente base profundo */}
+        {/* Capa 1 — foto: cosechadora en campo de trigo */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          aria-hidden
+          src="/images/grains/farm-01.jpg"
+          alt=""
+          className="absolute inset-0 -z-30 h-full w-full object-cover"
+        />
+        {/* Capa 2 — overlay diagonal: oscuro en izq (texto legible),
+                    se atenúa a la derecha para que la foto respire */}
         <div
           aria-hidden
-          className="absolute inset-0 -z-30"
+          className="absolute inset-0 -z-20"
           style={{
             background:
-              "linear-gradient(160deg, #17170f 0%, #1e2a18 35%, #2a3a20 65%, #3e4f26 100%)",
+              "linear-gradient(105deg, rgba(23,23,15,0.92) 0%, rgba(23,23,15,0.78) 35%, rgba(23,23,15,0.55) 60%, rgba(23,23,15,0.35) 100%)",
           }}
         />
-        {/* Capa 2 — glow cálido (único, sutil) */}
+        {/* Capa 3 — viñeteado inferior para anclar al fondo */}
         <div
           aria-hidden
-          className="absolute -right-32 -top-56 -z-20 h-[520px] w-[520px] rounded-full opacity-40 blur-2xl"
+          className="absolute inset-x-0 bottom-0 -z-10 h-48"
           style={{
-            background: "radial-gradient(circle, #a8bc7f 0%, transparent 70%)",
+            background:
+              "linear-gradient(to bottom, transparent 0%, rgba(23,23,15,0.85) 100%)",
           }}
         />
-        {/* Capa 3 — horizonte de campos estilizado (SVG) al pie */}
-        <svg
-          aria-hidden
-          viewBox="0 0 1440 320"
-          preserveAspectRatio="none"
-          className="absolute inset-x-0 bottom-0 -z-10 h-64 w-full opacity-60"
-        >
-          <defs>
-            <linearGradient id="hillA" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#4f632f" stopOpacity="0" />
-              <stop offset="100%" stopColor="#25301a" stopOpacity="0.9" />
-            </linearGradient>
-            <linearGradient id="hillB" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3e4f26" stopOpacity="0" />
-              <stop offset="100%" stopColor="#17170f" stopOpacity="1" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M0,220 C180,180 340,200 520,200 C700,200 860,170 1060,180 C1240,188 1360,200 1440,210 L1440,320 L0,320 Z"
-            fill="url(#hillA)"
-          />
-          <path
-            d="M0,260 C160,230 320,260 500,250 C700,238 860,270 1060,260 C1240,252 1360,270 1440,262 L1440,320 L0,320 Z"
-            fill="url(#hillB)"
-          />
-        </svg>
 
         <div className="mx-auto grid max-w-6xl gap-12 px-6 pb-24 pt-20 md:grid-cols-[1.2fr_1fr] md:gap-16 md:pt-28">
           <div className="anim-fade-up">
@@ -73,12 +61,17 @@ export default function HomePage() {
               Marketplace global de granos · {GRAIN_TYPES.length} cultivos
             </p>
 
-            <h1 className="mt-7 font-display text-4xl font-medium leading-[1.05] tracking-tight md:text-5xl lg:text-[56px]">
-              Comprá y vendé granos físicos,{" "}
-              <span className="italic text-brand-200">
-                directo entre empresas
-              </span>
-              .
+            <h1
+              className="mt-7 font-display text-4xl font-medium leading-[1.05] tracking-tight md:text-5xl lg:text-[56px]"
+              aria-label="Comprá y vendé granos físicos, directo entre empresas."
+            >
+              <SplitHeadline>
+                Comprá y vendé granos físicos,{" "}
+                <span className="italic text-brand-200">
+                  directo entre empresas
+                </span>
+                .
+              </SplitHeadline>
             </h1>
             <p className="mt-3 font-display text-base italic text-ink-50/60">
               El campo, conectado.
@@ -125,37 +118,71 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Panel lateral — stats */}
+          {/* Panel lateral — stats glassmorphic */}
           <aside className="anim-fade-up anim-delay-2 hidden self-end md:block">
-            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-ink-50/10 bg-ink-50/[0.08]">
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-ink-50/15 bg-ink-900/55 shadow-2xl backdrop-blur-md">
               <Stat
-                value={formatTonnage(stats.totalTonnage).replace(" t", " t")}
+                value={formatTonnage(stats.totalTonnage)}
                 label="Toneladas disponibles"
               />
               <Stat value={`${stats.activeCount}`} label="Ofertas activas" />
               <Stat value={`${stats.newToday}`} label="Nuevas hoy" />
               <Stat value="0%" label="Comisión MVP" />
             </div>
-            <p className="mt-4 text-xs text-ink-50/50">
+            <p className="mt-4 text-xs text-ink-50/55">
               Datos del marketplace · MVP en validación.
             </p>
           </aside>
         </div>
       </section>
 
-      {/* Granos disponibles — tira editorial ---------------------------- */}
-      <section className="border-b border-ink-100 bg-ink-50">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-6 py-6 text-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-500">
-            Granos disponibles
-          </p>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-ink-800">
-            {GRAIN_TYPES.map((g, i) => (
-              <span key={g.value} className="inline-flex items-center gap-5">
-                {i > 0 && <span className="h-1 w-1 rounded-full bg-ink-300" />}
-                <span>{g.label}</span>
-              </span>
-            ))}
+      {/* Live ticker de actividad --------------------------------------- */}
+      <LiveTicker />
+
+      {/* Cultivos — grid clickeable ------------------------------------- */}
+      <section className="border-b border-ink-100 bg-white">
+        <div className="mx-auto max-w-6xl px-6 py-16">
+          <div className="mb-8 flex items-end justify-between gap-6">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">
+                Cultivos disponibles
+              </p>
+              <h2 className="mt-2 font-display text-3xl font-medium tracking-tight text-ink-900 md:text-4xl">
+                Explorá por <em className="text-brand-700">grano</em>.
+              </h2>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {GRAIN_TYPES.map((g) => {
+              const count = MOCK_LISTINGS.filter(
+                (l) => l.status === "active" && l.grain_type === g.value,
+              ).length;
+              return (
+                <Link
+                  key={g.value}
+                  href={`/marketplace?grain=${g.value}`}
+                  className="group relative block aspect-square overflow-hidden rounded-2xl border border-ink-100 transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-ink-200 hover:shadow-lg"
+                >
+                  {/* Capa visual */}
+                  <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-[1.06]">
+                    <GrainVisual
+                      grainType={g.value}
+                      size="card"
+                      className="h-full w-full"
+                    />
+                  </div>
+                  {/* Capa contenido */}
+                  <div className="relative z-10 flex h-full flex-col justify-between p-4">
+                    <span className="self-start rounded-full bg-white/95 px-2.5 py-0.5 text-[11px] font-medium text-ink-700 shadow-sm backdrop-blur">
+                      {count} {count === 1 ? "oferta" : "ofertas"}
+                    </span>
+                    <p className="font-display text-3xl font-medium leading-none tracking-tight text-white drop-shadow-md">
+                      {g.label}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -179,8 +206,10 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((l) => (
-            <ListingCard key={l.id} listing={l} />
+          {featured.map((l, i) => (
+            <Reveal key={l.id} delay={i * 80}>
+              <ListingCard listing={l} />
+            </Reveal>
           ))}
         </div>
       </section>
@@ -237,6 +266,57 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* FAQ ------------------------------------------------------------ */}
+      <section className="border-t border-ink-100 bg-white">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <div className="grid gap-12 md:grid-cols-[1fr_2fr]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">
+                Preguntas frecuentes
+              </p>
+              <h2 className="mt-2 font-display text-3xl font-medium tracking-tight text-ink-900 md:text-4xl">
+                Lo que querés saber.
+              </h2>
+              <p className="mt-4 text-sm text-ink-600">
+                ¿No encontrás respuesta?{" "}
+                <Link
+                  href="/contacto"
+                  className="font-medium text-brand-700 underline underline-offset-4 hover:text-brand-800"
+                >
+                  Escribinos.
+                </Link>
+              </p>
+            </div>
+            <div className="divide-y divide-ink-100 border-y border-ink-100">
+              <FaqItem
+                q="¿Campo cobra alguna comisión?"
+                a="Durante el MVP, cero. Publicar y mostrar interés es gratis. Si en el futuro agregamos servicios pagos (logística, escrow, financiación), serán opcionales."
+              />
+              <FaqItem
+                q="¿Cómo se verifica un vendedor?"
+                a="Hoy es manual: revisamos razón social, contacto y antecedentes. La marca «Empresa verificada» refleja esa revisión. A futuro vamos a integrar verificación automática vía CUIT/Tax ID."
+              />
+              <FaqItem
+                q="¿Qué pasa después del «Me interesa»?"
+                a="El vendedor recibe tu mensaje y datos de contacto. La negociación, los términos comerciales y el pago se manejan por fuera de Campo — como ya lo hacés hoy."
+              />
+              <FaqItem
+                q="¿De qué países pueden ser las publicaciones?"
+                a="Globales. Hoy tenemos vendedores y compradores activos en Argentina, Brasil, Uruguay, Paraguay, EE. UU., Canadá, Ucrania, Francia, Australia y más."
+              />
+              <FaqItem
+                q="¿Puedo publicar sin precio fijo?"
+                a="Sí. La modalidad «A convenir» permite abrir la negociación sin anclarte a un valor — útil cuando esperás cierre por mercado o cuando es un volumen grande."
+              />
+              <FaqItem
+                q="¿Cómo manejan la confidencialidad?"
+                a="Sólo se muestra públicamente: tipo de grano, toneladas, ubicación, precio (si lo cargás) y razón social. Tu teléfono y email se comparten cuando hay interés mutuo."
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA final ------------------------------------------------------ */}
       <section className="mx-auto max-w-6xl px-6 pb-24">
         <div className="relative overflow-hidden rounded-3xl border border-brand-800 bg-brand-800 p-10 text-ink-50 md:p-16">
@@ -281,7 +361,7 @@ export default function HomePage() {
 
 function Stat({ value, label }: { value: string; label: string }) {
   return (
-    <div className="bg-ink-900/85 px-6 py-6">
+    <div className="bg-transparent px-6 py-6">
       <p className="font-display text-3xl font-medium tracking-tight text-ink-50">
         {value}
       </p>
@@ -312,6 +392,34 @@ function Step({
       </h3>
       <p className="mt-2 text-[15px] leading-relaxed text-ink-600">{text}</p>
     </div>
+  );
+}
+
+function FaqItem({ q, a }: { q: string; a: string }) {
+  return (
+    <details className="group py-5 [&_summary::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer items-start justify-between gap-4 list-none">
+        <span className="font-medium text-ink-900 transition-colors group-hover:text-brand-800">
+          {q}
+        </span>
+        <span
+          aria-hidden
+          className="mt-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-ink-200 text-ink-500 transition-all group-open:rotate-45 group-open:border-brand-700 group-open:bg-brand-700 group-open:text-white"
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path
+              d="M6 1.5v9M1.5 6h9"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        </span>
+      </summary>
+      <p className="mt-3 max-w-2xl pr-10 text-[15px] leading-relaxed text-ink-600">
+        {a}
+      </p>
+    </details>
   );
 }
 

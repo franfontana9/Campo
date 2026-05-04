@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { Wheat, Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { MobileNav } from "./MobileNav";
 
 export function Navbar() {
   return (
     <header className="sticky top-0 z-30 border-b border-ink-100 bg-white">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-6 md:gap-6">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-6 md:gap-6">
+        {/* Mobile menu (visible <md) */}
+        <MobileNav />
+
         {/* Logo */}
         <Link
           href="/"
@@ -15,7 +19,7 @@ export function Navbar() {
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-white transition-colors group-hover:bg-brand-800">
             <Wheat className="h-[18px] w-[18px]" strokeWidth={2} />
           </span>
-          <span className="font-display text-[22px] font-medium leading-none tracking-tight text-ink-900">
+          <span className="hidden font-display text-[22px] font-medium leading-none tracking-tight text-ink-900 sm:inline">
             Campo
           </span>
         </Link>

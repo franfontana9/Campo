@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { X, Circle } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Marketplace",
+  description:
+    "Explorá ofertas activas de granos físicos en el mundo. Filtrá por grano, país, volumen y modalidad.",
+};
 import { ListingCard } from "@/components/listings/ListingCard";
 import { ListingFilters } from "@/components/listings/ListingFilters";
+import { ListingFiltersMobile } from "@/components/listings/ListingFiltersMobile";
+import { Reveal } from "@/components/effects/Reveal";
 import { MOCK_LISTINGS, getMarketplaceStats } from "@/lib/mock-data";
 import { countryLabel, GRAIN_TYPES, PRICE_MODES } from "@/lib/constants";
 import { timeAgo } from "@/lib/utils";
@@ -148,21 +157,24 @@ export default async function MarketplacePage({
       </header>
 
       <div className="grid gap-10 md:grid-cols-[260px_1fr]">
-        <aside className="md:sticky md:top-24 md:self-start">
+        <aside className="hidden md:sticky md:top-24 md:block md:self-start">
           <ListingFilters />
         </aside>
 
         <section>
           {/* Resultado count + chips activos */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-ink-100 pb-5">
-            <p className="text-[15px]">
-              <span className="font-display text-2xl font-medium text-ink-900">
-                {listings.length}
-              </span>{" "}
-              <span className="text-ink-500">
-                {listings.length === 1 ? "resultado" : "resultados"}
-              </span>
-            </p>
+            <div className="flex items-center gap-3">
+              <ListingFiltersMobile activeCount={chips.length} />
+              <p className="text-[15px]">
+                <span className="font-display text-2xl font-medium text-ink-900">
+                  {listings.length}
+                </span>{" "}
+                <span className="text-ink-500">
+                  {listings.length === 1 ? "resultado" : "resultados"}
+                </span>
+              </p>
+            </div>
             {chips.length > 0 && (
               <div className="flex flex-wrap items-center gap-2">
                 {chips.map((c) => (
@@ -202,8 +214,10 @@ export default async function MarketplacePage({
             </div>
           ) : (
             <div className="grid gap-7 sm:grid-cols-2 xl:grid-cols-3">
-              {listings.map((l) => (
-                <ListingCard key={l.id} listing={l} />
+              {listings.map((l, i) => (
+                <Reveal key={l.id} delay={Math.min(i, 8) * 60}>
+                  <ListingCard listing={l} />
+                </Reveal>
               ))}
             </div>
           )}

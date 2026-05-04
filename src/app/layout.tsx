@@ -19,9 +19,39 @@ const interTight = Inter_Tight({
 });
 
 export const metadata: Metadata = {
-  title: "Campo · Marketplace global de granos",
+  title: {
+    default: "Campo · Marketplace global de granos",
+    template: "%s · Campo",
+  },
   description:
-    "Publicá y descubrí ofertas de soja, maíz y trigo en todo el mundo. Campo conecta vendedores y compradores de granos físicos B2B.",
+    "Marketplace B2B de granos físicos. Publicá tu oferta o descubrí miles de toneladas de soja, maíz, trigo, girasol, sorgo, cebada, avena y arroz — directo entre empresas, sin corredores.",
+  applicationName: "Campo",
+  keywords: [
+    "granos",
+    "marketplace",
+    "soja",
+    "maíz",
+    "trigo",
+    "girasol",
+    "sorgo",
+    "cebada",
+    "agro",
+    "B2B",
+    "exportación",
+  ],
+  openGraph: {
+    type: "website",
+    siteName: "Campo",
+    title: "Campo · Marketplace global de granos",
+    description:
+      "Publicá y descubrí ofertas de granos físicos. Sin corredores, sin comisiones.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Campo · Marketplace global de granos",
+    description:
+      "Publicá y descubrí ofertas de granos físicos. Sin corredores, sin comisiones.",
+  },
 };
 
 export default function RootLayout({
