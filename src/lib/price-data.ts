@@ -3,7 +3,7 @@ export const USD_TO_UYU = 43.2;
 
 export type Currency = "USD" | "ARS" | "UYU";
 
-export type WeekPrice = { week: string; label: string; usd: number };
+export type WeekPrice = { week: string; label: string; usd: number; volume: number; orders: number };
 
 export type GrainPrice = {
   grain: string;
@@ -28,7 +28,9 @@ function weeks(base: number, volatility: number, n = 52): WeekPrice[] {
     const seasonal = Math.sin((d.getMonth() / 12) * 2 * Math.PI) * volatility * 0.5;
     price = price + (Math.random() - 0.47) * volatility + seasonal * 0.3;
     price = Math.max(price, base * 0.6); // floor at 60% of base
-    result.push({ week: label, label: `${label}/${year}`, usd: Math.round(price * 10) / 10 });
+    const volume = Math.round((base * 80 + Math.random() * base * 120) * 10) / 10;
+    const orders = Math.round(3 + Math.random() * 47);
+    result.push({ week: label, label: `${label}/${year}`, usd: Math.round(price * 10) / 10, volume, orders });
   }
   return result;
 }

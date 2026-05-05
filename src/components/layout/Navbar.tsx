@@ -63,6 +63,18 @@ export function Navbar() {
             Precios
           </Link>
           <Link
+            href="/prestamos"
+            className="text-ink-700 transition-colors hover:text-ink-900"
+          >
+            Préstamos
+          </Link>
+          <Link
+            href="/clima"
+            className="text-ink-700 transition-colors hover:text-ink-900"
+          >
+            Clima
+          </Link>
+          <Link
             href="/geografia"
             className="text-ink-700 transition-colors hover:text-ink-900"
           >
