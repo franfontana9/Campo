@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter_Tight } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Onboarding } from "@/components/effects/Onboarding";
+import { CurrencyProvider } from "@/components/providers/CurrencyProvider";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -64,10 +66,23 @@ export default function RootLayout({
       className={`${fraunces.variable} ${interTight.variable}`}
     >
       <body className="flex min-h-screen flex-col antialiased">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <Onboarding />
+        <CurrencyProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <Onboarding />
+          <Toaster
+            position="top-right"
+            richColors
+            closeButton
+            toastOptions={{
+              classNames: {
+                toast:
+                  "rounded-2xl border-ink-100 shadow-xl font-sans",
+              },
+            }}
+          />
+        </CurrencyProvider>
       </body>
     </html>
   );

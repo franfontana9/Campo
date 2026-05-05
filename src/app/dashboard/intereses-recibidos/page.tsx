@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Building2, Check, X, MapPin, ExternalLink } from "lucide-react";
+import { Building2, MapPin, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { InterestActions } from "@/components/listings/InterestActions";
 import { CURRENT_USER, MOCK_INTERESTS, MOCK_LISTINGS } from "@/lib/mock-data";
 import { countryLabel, grainLabel } from "@/lib/constants";
 import { formatTonnage, timeAgo } from "@/lib/utils";
@@ -133,12 +133,7 @@ export default async function InteresesRecibidosPage({
                 {/* Acciones */}
                 {i.status === "pending" && (
                   <div className="flex flex-wrap items-center justify-end gap-2 border-t border-ink-100 px-5 py-3">
-                    <Button size="sm" variant="outline">
-                      <X className="h-3.5 w-3.5" /> Rechazar
-                    </Button>
-                    <Button size="sm">
-                      <Check className="h-3.5 w-3.5" /> Aceptar
-                    </Button>
+                    <InterestActions buyerName={i.buyer?.full_name ?? "el comprador"} />
                   </div>
                 )}
               </li>

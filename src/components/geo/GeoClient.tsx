@@ -352,7 +352,7 @@ export function GeoClient() {
   ].filter(Boolean).length;
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12">
+    <div className="mx-auto w-full max-w-[1440px] px-6 py-12 lg:px-10">
       {/* Header */}
       <header className="mb-10 border-b border-ink-100 pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">Explorar</p>

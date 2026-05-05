@@ -4,8 +4,6 @@ import { notFound } from "next/navigation";
 import {
   ArrowLeft,
   Building2,
-  Check,
-  X,
   MapPin,
   Pencil,
   ExternalLink,
@@ -19,6 +17,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { InterestActions } from "@/components/listings/InterestActions";
 import {
   CURRENT_USER,
   MOCK_CHATS,
@@ -335,14 +334,9 @@ export default async function PublicacionDetallePage({
                       </Link>
                     )}
                     {i.status === "pending" && (
-                      <>
-                        <Button size="sm" variant="outline">
-                          <X className="h-3.5 w-3.5" /> Rechazar
-                        </Button>
-                        <Button size="sm">
-                          <Check className="h-3.5 w-3.5" /> Aceptar
-                        </Button>
-                      </>
+                      <InterestActions
+                        buyerName={i.buyer?.full_name ?? "el comprador"}
+                      />
                     )}
                   </div>
                 </li>

@@ -16,12 +16,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { DisplayPrice } from "@/components/ui/DisplayPrice";
 import { Textarea } from "@/components/ui/Textarea";
-import { Label } from "@/components/ui/Label";
 import { MOCK_LISTINGS } from "@/lib/mock-data";
 import {
   formatDate,
-  formatPrice,
   formatTonnage,
   mockInterestsCount,
   timeAgo,
@@ -30,6 +29,7 @@ import { countryLabel, grainLabel } from "@/lib/constants";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { GrainVisual } from "@/components/listings/GrainVisual";
 import { ListingGallery } from "@/components/listings/ListingGallery";
+import { InterestForm } from "@/components/listings/InterestForm";
 import { ReportButton } from "@/components/ui/ReportButton";
 import { getListingGallery, MOCK_QUESTIONS } from "@/lib/mock-data";
 
@@ -156,7 +156,13 @@ export default async function ListingDetailPage({
             <Spec
               icon={<Coins className="h-4 w-4" />}
               label={listing.price_mode === "fixed" ? "Precio / t" : "Precio"}
-              value={formatPrice(listing.price, listing.currency)}
+              value={
+                <DisplayPrice
+                  amount={listing.price}
+                  from={listing.currency}
+                  showApprox={false}
+                />
+              }
             />
             <Spec
               icon={<Calendar className="h-4 w-4" />}
@@ -316,16 +322,20 @@ export default async function ListingDetailPage({
                   : "Modalidad"}
               </p>
               <p className="mt-2 font-display text-5xl font-medium tracking-tight text-ink-900">
-                {formatPrice(listing.price, listing.currency)}
+                <DisplayPrice
+                  amount={listing.price}
+                  from={listing.currency}
+                  showApprox={false}
+                />
               </p>
               {listing.price_mode === "fixed" ? (
                 <p className="mt-2 text-sm text-ink-500">
                   Total estimado{" "}
                   <span className="font-medium text-ink-900">
-                    {formatPrice(
-                      (listing.price ?? 0) * listing.tonnage,
-                      listing.currency,
-                    )}
+                    <DisplayPrice
+                      amount={(listing.price ?? 0) * listing.tonnage}
+                      from={listing.currency}
+                    />
                   </span>{" "}
                   · {formatTonnage(listing.tonnage)}
                 </p>
@@ -358,32 +368,10 @@ export default async function ListingDetailPage({
 
             {/* Formulario de interés */}
             <div className="border-t border-ink-100 bg-ink-50/60 p-7">
-              <form className="space-y-3">
-                <div>
-                  <Label htmlFor="message">Mensaje inicial</Label>
-                  <Textarea
-                    id="message"
-                    rows={4}
-                    placeholder="Hola, me interesa la oferta. ¿Podemos hablar sobre condiciones y entrega?"
-                    className="mt-1.5"
-                  />
-                </div>
-                <Button type="submit" size="lg" className="w-full">
-                  <MessageSquare className="h-4 w-4" />
-                  Me interesa
-                </Button>
-                <Button
-                  type="button"
-                  size="lg"
-                  variant="outline"
-                  className="w-full"
-                >
-                  Guardar para después
-                </Button>
-                <p className="text-center text-xs text-ink-500">
-                  Necesitás una cuenta para enviar tu interés.
-                </p>
-              </form>
+              <InterestForm
+                listingId={listing.id}
+                sellerName={listing.seller?.full_name ?? "el vendedor"}
+              />
             </div>
 
             {/* Señales de confianza + actividad */}
@@ -414,10 +402,14 @@ export default async function ListingDetailPage({
 
       {/* Sticky CTA mobile — visible sólo en <lg, sale del flow */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink-100 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.15)] backdrop-blur-md lg:hidden">
-        <div className="mx-auto flex max-w-6xl items-center gap-3">
+        <div className="mx-auto flex w-full max-w-[1440px] items-center gap-3 px-2">
           <div className="min-w-0 flex-1">
             <p className="truncate font-display text-xl font-medium text-ink-900">
-              {formatPrice(listing.price, listing.currency)}
+              <DisplayPrice
+                amount={listing.price}
+                from={listing.currency}
+                showApprox={false}
+              />
             </p>
             <p className="truncate text-[11px] uppercase tracking-[0.14em] text-ink-500">
               {listing.price_mode === "fixed" ? "Precio / t" : "A convenir"}

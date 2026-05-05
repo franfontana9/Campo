@@ -3,6 +3,7 @@ import { Wheat, Search, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { MobileNav } from "./MobileNav";
 import { NotificationsBell } from "./NotificationsBell";
+import { CurrencySelector } from "./CurrencySelector";
 import { MOCK_CHATS } from "@/lib/mock-data";
 
 export function Navbar() {
@@ -76,7 +77,8 @@ export function Navbar() {
         </nav>
 
         {/* Acciones de sesión (mock — visibles siempre por ahora) */}
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-2 md:flex">
+          <CurrencySelector />
           <Link
             href="/dashboard/chats"
             className="relative flex h-9 w-9 items-center justify-center rounded-full text-ink-700 transition-colors hover:bg-ink-100 hover:text-ink-900"

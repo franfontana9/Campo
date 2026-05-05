@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Bookmark, BookmarkCheck, Check } from "lucide-react";
+import { toast } from "sonner";
 
 const KEY = "campo:saved-searches";
 
@@ -54,6 +55,9 @@ export function SaveSearchButton({
     if (saved) {
       writeSaved(list.filter((s) => s.query !== searchString));
       setSaved(false);
+      toast("Búsqueda eliminada", {
+        description: label,
+      });
     } else {
       const next: Saved = {
         id: Math.random().toString(36).slice(2, 9),
@@ -65,6 +69,15 @@ export function SaveSearchButton({
       setSaved(true);
       setFlash(true);
       window.setTimeout(() => setFlash(false), 1800);
+      toast.success("Búsqueda guardada", {
+        description: label,
+        action: {
+          label: "Ver guardadas",
+          onClick: () => {
+            window.location.href = "/dashboard/busquedas";
+          },
+        },
+      });
     }
   };
 

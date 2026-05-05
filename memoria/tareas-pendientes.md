@@ -4,6 +4,30 @@ Backlog vivo de features y mejoras del producto. Se organiza por bloque y priori
 
 ---
 
+## 0. Cambio de modelo — comisión por transacción
+
+> **Decisión 2026-05-04**: Campo cobra por transacción cerrada (no es 0% comisión como dice hoy la landing y varios FAQs). Hay que actualizar copy, definir tarifa/quien paga/cuándo se cobra, y empezar a modelar el flujo de cobro.
+
+- [ ] **Definir el modelo concreto**:
+  - % de comisión sobre monto operado (¿1%? ¿0,5%? ¿escalonado por volumen?)
+  - ¿Lo paga vendedor, comprador, o se split 50/50?
+  - ¿Se cobra al cerrar el chat ("operación cerrada"), al confirmar entrega, o al pago?
+  - Mínimo / máximo por operación
+  - Política para operaciones sub-marketplace ("cierran por afuera")
+- [ ] **Actualizar copy en toda la app** — hoy dice "Sin comisiones" / "0% Comisión MVP" / "Publicar y mostrar interés gratis":
+  - `src/app/page.tsx` — hero stats ("0% Comisión MVP"), trust strip ("0% de comisión"), CTA final ("Sin comisiones"), FAQ "¿Campo cobra alguna comisión?"
+  - `src/components/layout/Footer.tsx` — claim "sin corredores"
+  - `memoria/product-definition.md`, `decisiones.md`
+  - Términos y privacidad
+- [ ] **Schema DB**: tabla `transactions` o `fees` (operation_id, amount, currency, fee_amount, fee_currency, status, paid_at, payer).
+- [ ] **Trigger del cobro**: cuando un chat pasa a estado "cerrada" — disparar creación de fee record.
+- [ ] **Integración de pago**: definir si Mercado Pago + Stripe, dlocal, escrow especializado en agro, o factura manual al inicio del MVP.
+- [ ] **Dashboard de facturación** del usuario — ver fees pendientes, pagas, comprobantes descargables.
+- [ ] **Reportar comisión cobrada** en el detalle de la operación (tanto al vendedor como al comprador, según quién pague).
+- [ ] **Política antifraude / antielusion** — la lógica natural va a ser que las partes intenten cerrar por afuera para evitar la comisión. Estrategias: bonus de calificación, verificación de operación, garantía de cumplimiento, escrow opcional.
+
+---
+
 ## 1. Crítico para que el MVP "funcione"
 
 Sin esto los flujos del producto no cierran.
@@ -222,6 +246,30 @@ Bloque transversal: mejorar feel y claridad en cada vista. Listado por pantalla 
 - [ ] **Conteo de coincidencias actuales** por búsqueda guardada.
 - [ ] **Renombrar / reordenar** búsquedas.
 
+### Precios (`/precios`)
+- [ ] **Sticky header** con grano seleccionado + precio actual + cambio % cuando se hace scroll en el gráfico.
+- [ ] **Toggle de monedas inline** (USD / ARS / UYU) más destacado — hoy está en el panel pero pasa desapercibido.
+- [ ] **Comparar 2-3 granos** sobre el mismo gráfico (multi-line) en vez de uno por vez.
+- [ ] **Anotaciones de eventos** sobre el gráfico ("sequía Pampa húmeda", "guerra Ucrania-Rusia", etc.) — ayuda a leer la curva.
+- [ ] **Min / max histórico** marcados en la línea con tooltips.
+- [ ] **Indicador "actualizado hace X"** en la cabecera + horario de próxima actualización.
+- [ ] **Export CSV / PDF** del rango seleccionado.
+- [ ] **Sparklines en color** según tendencia (verde/rojo) y no genéricos.
+- [ ] **Drilldown a publicaciones**: click en un grano → "ver ofertas activas de soja" linkea al marketplace filtrado.
+- [ ] **Mobile**: la tabla de precios necesita scroll horizontal o cards apiladas; revisar con dev tools.
+
+### Geografía (`/geografia`)
+- [ ] **Heatmap por grano** — colorear provincias por intensidad de oferta del grano filtrado.
+- [ ] **Lista lateral con resultados** del filtro aplicado (provincias con N publicaciones), sincronizada con hover en el mapa.
+- [ ] **Toggle entre AR y UY** más prominente — hoy es un select, podría ser tabs.
+- [ ] **Sumar Brasil, Paraguay y Estados Unidos** (tenemos publicaciones de esos países en mock).
+- [ ] **Click en marcador → drawer** con preview de la publicación (no solo tooltip).
+- [ ] **Persistir zoom y filtros** en URL para compartir vistas.
+- [ ] **Leyenda visible** del color/tamaño de los marcadores.
+- [ ] **Botón "Reset vista"** además de los +/−.
+- [ ] **Mobile**: hoy el mapa puede ser difícil de manipular en touch; evaluar gestos pinch-zoom o un fallback.
+- [ ] **Atribución del GeoJSON** y/o Natural Earth en el footer del mapa.
+
 ### Mi perfil (`/dashboard/perfil`)
 - [ ] **Upload de logo / avatar** (Supabase Storage).
 - [ ] **Preview en vivo** de cómo se ve el perfil público mientras se edita.
@@ -239,12 +287,27 @@ Bloque transversal: mejorar feel y claridad en cada vista. Listado por pantalla 
 - [ ] **Magic link** (passwordless) como opción.
 - [ ] **Indicador de fortaleza de password** en register.
 - [ ] **Recuperar contraseña** flow completo.
+- [ ] **Lado izquierdo editorial** con foto de campo + frase de marca en register/login (split-screen estilo Notion/Linear), no el form solo y centrado en cremita.
+- [ ] **"Continuar como invitado"** para explorar el marketplace sin registrarse (con CTA para registrarse cuando quieran enviar interés).
+- [ ] **Validación inline en email** (formato + dominio existente) antes del submit.
+- [ ] **Detección de país** por geo-IP para preseleccionar bandera/teléfono.
 
 ### Legales (`/ayuda`, `/contacto`, `/blog`, `/terminos`, `/privacidad`)
 - [ ] **TOC sticky** en docs largos.
 - [ ] **Anchor links copy-on-hover** en cada heading.
 - [ ] **Estimador de tiempo de lectura** en blog.
 - [ ] **Última actualización visible** en términos / privacidad.
+- [ ] **Búsqueda en /ayuda** con autocompletar artículos.
+- [ ] **/ayuda con categorías visuales** (Empezar, Publicar, Operar, Cuenta, Pagos…) en grid de cards.
+- [ ] **/contacto con WhatsApp directo** además del form (botón con QR + link `wa.me`).
+- [ ] **/blog**: portada editorial con post destacado grande + grilla de posts; tags por tema.
+- [ ] **404** custom con ilustración de grano + sugerencias ("¿buscabas X? probá Y").
+
+### Onboarding / primer login
+- [ ] **Pasos del Onboarding** ya existe pero hoy son 3 pantallas genéricas; rehacerlas con mock real del producto.
+- [ ] **Persistir progreso** del onboarding en `localStorage` (hoy se cierra y vuelve a aparecer).
+- [ ] **Tour interactivo** post-onboarding señalando "publicar oferta", "intereses", "chats" en la UI real (popovers con Tippy/Floating UI).
+- [ ] **Skip opt-in** para quien ya conoce el producto.
 
 ### Globales / sistema de diseño
 - [ ] **Dark mode** — el design system ya tiene neutros cálidos; sería natural extenderlo.
@@ -257,6 +320,26 @@ Bloque transversal: mejorar feel y claridad en cada vista. Listado por pantalla 
 - [ ] **Imágenes optimizadas** — auditar `<img>` directos vs `<Image>` de Next; los hero usan `<img>` con `aria-hidden`.
 - [ ] **Empty states con personalidad** — ilustraciones de grano/campo en vez de solo texto.
 - [ ] **Mobile UX pass** — hay `MobileNav` y bottom CTAs en detalle; revisar dashboard sidebar (hoy se apila arriba sin el menú collapsable).
+- [ ] **Selector de moneda global** persistente en navbar (USD / ARS / BRL / UYU / EUR) — afecta marketplace, precios, geo, listing detail.
+- [ ] **Selector de unidad** (toneladas / bushels) — relevante para la audiencia US/global.
+- [ ] **Selector de idioma** preparado para i18n (es / pt / en) en navbar/footer.
+- [ ] **Modal share / link copy** unificado (hoy no hay; se va a necesitar para perfiles, publicaciones, búsquedas).
+- [ ] **Confirmación destructiva** estandarizada (ej. "¿Eliminar publicación?") con un único componente Dialog.
+- [ ] **Banner de cookies / consentimiento** — necesario para EU + buena práctica.
+- [ ] **Print styles** decentes en publicaciones y perfil — los compradores van a imprimir o PDF para mostrar al equipo.
+- [ ] **Favicon + OG images** custom por sección (hoy hay genérico).
+- [ ] **Prefetch / hover-prefetch** en navbar y cards para que la navegación se sienta instantánea.
+- [ ] **Reduced motion** ya respetado en globals.css; auditar componentes nuevos.
+
+### Performance & SEO
+- [ ] **Server components donde corresponda** — hoy hay client components para cosas que podrían ser RSC (SavedSearches, NotificationsBell). Revisar bundle.
+- [ ] **next/image en lugar de `<img>`** para fotos de granos del hero, marketplace cards, perfiles.
+- [ ] **Lazy-load** mapa de geografía y gráficos de precios — hoy se cargan junto a la página (`react-simple-maps` pesa).
+- [ ] **Sitemap.xml** y robots.txt.
+- [ ] **JSON-LD structured data** en publicaciones (Product schema) y perfiles (Organization schema) para SEO.
+- [ ] **Open Graph dinámico** por publicación con imagen del grano.
+- [ ] **RSS** del blog y de "nuevas ofertas por grano/país" (para integradores).
+- [ ] **Métricas de Core Web Vitals** — instrumentar Vercel Analytics o equivalente.
 
 ---
 

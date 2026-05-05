@@ -14,9 +14,10 @@ import { GrainVisual } from "@/components/listings/GrainVisual";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { LiveTicker } from "@/components/listings/LiveTicker";
 import { MOCK_LISTINGS, getMarketplaceStats } from "@/lib/mock-data";
-import { timeAgo, formatTonnage } from "@/lib/utils";
+import { timeAgo } from "@/lib/utils";
 import { SplitHeadline } from "@/components/effects/SplitHeadline";
 import { Reveal } from "@/components/effects/Reveal";
+import { CountUp } from "@/components/effects/CountUp";
 
 export default function HomePage() {
   const featured = MOCK_LISTINGS.filter((l) => l.status === "active").slice(0, 3);
@@ -122,11 +123,21 @@ export default function HomePage() {
           <aside className="anim-fade-up anim-delay-2 hidden self-end md:block">
             <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-ink-50/15 bg-ink-900/55 shadow-2xl backdrop-blur-md">
               <Stat
-                value={formatTonnage(stats.totalTonnage)}
+                value={
+                  <>
+                    <CountUp to={stats.totalTonnage} /> t
+                  </>
+                }
                 label="Toneladas disponibles"
               />
-              <Stat value={`${stats.activeCount}`} label="Ofertas activas" />
-              <Stat value={`${stats.newToday}`} label="Nuevas hoy" />
+              <Stat
+                value={<CountUp to={stats.activeCount} />}
+                label="Ofertas activas"
+              />
+              <Stat
+                value={<CountUp to={stats.newToday} />}
+                label="Nuevas hoy"
+              />
               <Stat value="0%" label="Comisión MVP" />
             </div>
             <p className="mt-4 text-xs text-ink-50/55">
@@ -394,7 +405,7 @@ export default function HomePage() {
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+function Stat({ value, label }: { value: React.ReactNode; label: string }) {
   return (
     <div className="bg-transparent px-6 py-6">
       <p className="font-display text-3xl font-medium tracking-tight text-ink-50">

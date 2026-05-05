@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { CountUp } from "@/components/effects/CountUp";
 import {
   CURRENT_USER,
   MOCK_CHATS,
@@ -20,7 +21,6 @@ import {
   getUserStats,
 } from "@/lib/mock-data";
 import { countryLabel, grainLabel, LISTING_STATUSES } from "@/lib/constants";
-import type { ListingStatus } from "@/lib/constants";
 import { formatPrice, formatTonnage, timeAgo } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -336,14 +336,21 @@ function Stat({
 }) {
   const inner = (
     <>
+      {/* Línea de acento verde arriba — aparece en hover */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[2px] origin-left scale-x-0 rounded-full bg-gradient-to-r from-brand-400 via-brand-600 to-brand-700 transition-transform duration-300 ease-out group-hover:scale-x-100"
+      />
       <div className="flex items-center justify-between text-ink-500">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em]">
           {label}
         </p>
-        <span className="text-ink-400">{icon}</span>
+        <span className="text-ink-400 transition-colors group-hover:text-brand-700">
+          {icon}
+        </span>
       </div>
       <p className="mt-3 font-display text-4xl font-medium tracking-tight text-ink-900">
-        {value}
+        <CountUp to={value} />
       </p>
       <p
         className={`mt-1 text-xs ${
@@ -356,13 +363,13 @@ function Stat({
   );
 
   const base =
-    "block rounded-2xl border border-ink-100 bg-white p-5 shadow-sm";
+    "group relative block overflow-hidden rounded-2xl border border-ink-100 bg-white p-5 shadow-sm";
 
   if (href) {
     return (
       <Link
         href={href}
-        className={`${base} transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-ink-200 hover:shadow-md`}
+        className={`${base} transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-brand-300 hover:shadow-[0_18px_40px_-18px_rgba(62,79,38,0.35)]`}
       >
         {inner}
       </Link>
@@ -432,16 +439,20 @@ function Shortcut({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-4 rounded-2xl border border-ink-100 bg-white p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-ink-200 hover:shadow-md"
+      className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-ink-100 bg-white p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-brand-300 hover:shadow-[0_18px_40px_-18px_rgba(62,79,38,0.35)]"
     >
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700 transition-colors group-hover:bg-brand-100">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[2px] origin-left scale-x-0 rounded-full bg-gradient-to-r from-brand-400 via-brand-600 to-brand-700 transition-transform duration-300 ease-out group-hover:scale-x-100"
+      />
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700 transition-all duration-300 group-hover:scale-110 group-hover:bg-brand-100">
         {icon}
       </div>
       <div className="flex-1">
         <p className="font-medium text-ink-900">{title}</p>
         <p className="text-xs text-ink-500">{sub}</p>
       </div>
-      <ArrowRight className="h-4 w-4 text-ink-300 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-brand-700" />
+      <ArrowRight className="h-4 w-4 text-ink-300 transition-all duration-300 group-hover:translate-x-1 group-hover:text-brand-700" />
     </Link>
   );
 }

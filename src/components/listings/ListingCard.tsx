@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { MapPin, ArrowUpRight, Building2, ShieldCheck, Users } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { DisplayPrice } from "@/components/ui/DisplayPrice";
 import {
   formatDate,
-  formatPrice,
   formatTonnage,
   mockInterestsCount,
   timeAgo,
@@ -18,7 +18,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link
       href={`/marketplace/${listing.id}`}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-ink-100 bg-white transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-ink-200 hover:shadow-xl"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-ink-100 bg-white transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-brand-300 hover:shadow-[0_18px_40px_-18px_rgba(62,79,38,0.35)]"
     >
       {/* Visual */}
       <div className="relative aspect-[16/10] overflow-hidden">
@@ -90,7 +90,11 @@ export function ListingCard({ listing }: { listing: Listing }) {
               {listing.price_mode === "fixed" ? "Precio / t" : "Modalidad"}
             </p>
             <p className="mt-0.5 font-display text-2xl font-medium text-ink-900">
-              {formatPrice(listing.price, listing.currency)}
+              <DisplayPrice
+                amount={listing.price}
+                from={listing.currency}
+                showApprox={false}
+              />
             </p>
           </div>
           <span className="inline-flex items-center gap-1 rounded-full bg-ink-900 px-3.5 py-2 text-xs font-medium text-ink-50 transition-colors group-hover:bg-brand-700">

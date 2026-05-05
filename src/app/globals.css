@@ -211,6 +211,76 @@ body {
 }
 
 /* ============================================================
+   Page enter — fade muy sutil al cambiar de ruta
+   ============================================================ */
+main {
+  animation: pageEnter 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   Shimmer — para botones primary y CTAs destacados
+   ============================================================ */
+@layer utilities {
+  .shimmer-on-hover {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .shimmer-on-hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      120deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.18) 50%,
+      transparent 70%
+    );
+    transform: translateX(-100%);
+    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .shimmer-on-hover:hover::after {
+    transform: translateX(100%);
+  }
+
+  /* Glow halo para cards destacados / focus */
+  .glow-brand {
+    box-shadow:
+      0 0 0 1px rgba(132, 155, 87, 0.25),
+      0 18px 40px -18px rgba(62, 79, 38, 0.35);
+  }
+  .glow-brand-hover {
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .glow-brand-hover:hover {
+    box-shadow:
+      0 0 0 1px rgba(132, 155, 87, 0.4),
+      0 22px 48px -16px rgba(62, 79, 38, 0.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main {
+    animation: none !important;
+  }
+  .shimmer-on-hover::after {
+    display: none !important;
+  }
+}
+
+/* ============================================================
    Headline reveal — palabra por palabra (page load)
    ============================================================ */
 .headline-reveal {
