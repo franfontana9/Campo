@@ -3,6 +3,7 @@ import { Fraunces, Inter_Tight } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { Onboarding } from "@/components/effects/Onboarding";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -66,6 +67,7 @@ export default function RootLayout({
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
+        <Onboarding />
       </body>
     </html>
   );

@@ -1,12 +1,15 @@
 import Link from "next/link";
-import { Wheat, Search } from "lucide-react";
+import { Wheat, Search, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { MobileNav } from "./MobileNav";
+import { NotificationsBell } from "./NotificationsBell";
+import { MOCK_CHATS } from "@/lib/mock-data";
 
 export function Navbar() {
+  const unreadChats = MOCK_CHATS.reduce((sum, c) => sum + c.unread, 0);
   return (
     <header className="sticky top-0 z-30 border-b border-ink-100 bg-white">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-6 md:gap-6">
+      <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center gap-3 px-6 md:gap-6 lg:px-10">
         {/* Mobile menu (visible <md) */}
         <MobileNav />
 
@@ -59,6 +62,24 @@ export function Navbar() {
             Mi panel
           </Link>
         </nav>
+
+        {/* Acciones de sesión (mock — visibles siempre por ahora) */}
+        <div className="hidden items-center gap-1 md:flex">
+          <Link
+            href="/dashboard/chats"
+            className="relative flex h-9 w-9 items-center justify-center rounded-full text-ink-700 transition-colors hover:bg-ink-100 hover:text-ink-900"
+            aria-label={`Chats${unreadChats > 0 ? ` (${unreadChats} sin leer)` : ""}`}
+          >
+            <MessageSquare className="h-[18px] w-[18px]" />
+            {unreadChats > 0 && (
+              <span className="absolute right-0.5 top-0.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-brand-700 px-1 text-[10px] font-semibold text-white">
+                {unreadChats}
+              </span>
+            )}
+          </Link>
+          <NotificationsBell />
+        </div>
+
         <div className="flex shrink-0 items-center gap-2">
           <Link href="/login" className="hidden sm:inline-flex">
             <Button variant="ghost" size="sm">

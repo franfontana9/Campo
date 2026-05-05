@@ -29,6 +29,9 @@ import {
 import { countryLabel, grainLabel } from "@/lib/constants";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { GrainVisual } from "@/components/listings/GrainVisual";
+import { ListingGallery } from "@/components/listings/ListingGallery";
+import { ReportButton } from "@/components/ui/ReportButton";
+import { getListingGallery, MOCK_QUESTIONS } from "@/lib/mock-data";
 
 export async function generateMetadata({
   params,
@@ -66,9 +69,11 @@ export default async function ListingDetailPage({
     (l) => l.id !== listing.id && l.grain_type === listing.grain_type,
   ).slice(0, 3);
   const interests = mockInterestsCount(listing.id);
+  const gallery = getListingGallery(listing.id);
+  const questions = MOCK_QUESTIONS.filter((q) => q.listing_id === listing.id);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 pb-24 pt-10 lg:pb-10">
+    <div className="mx-auto w-full max-w-[1440px] px-6 pb-24 pt-10 lg:px-10 lg:pb-10">
       {/* Breadcrumb */}
       <nav className="mb-8 flex items-center gap-1.5 text-sm text-ink-500">
         <Link
@@ -83,37 +88,50 @@ export default async function ListingDetailPage({
         </span>
       </nav>
 
-      <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
+      <div className="grid gap-10 lg:grid-cols-[1fr_400px] xl:gap-14">
         {/* Columna principal */}
         <article>
-          {/* Hero visual */}
-          <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-ink-100 shadow-sm">
-            {listing.image_url ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={listing.image_url}
+          {/* Hero visual: galería con lightbox o GrainVisual de fallback */}
+          {listing.image_url || gallery.length > 0 ? (
+            <div className="relative">
+              <ListingGallery
+                images={
+                  listing.image_url ? [listing.image_url, ...gallery] : gallery
+                }
                 alt={`${grainLabel(listing.grain_type)} — ${listing.city}`}
-                className="h-full w-full object-cover"
               />
-            ) : (
+              <div className="pointer-events-none absolute left-5 top-5 z-10 flex gap-2">
+                <Badge variant="brand" className="shadow-sm">
+                  {grainLabel(listing.grain_type)}
+                </Badge>
+                <Badge variant="success" className="shadow-sm">
+                  Activa
+                </Badge>
+              </div>
+              <div className="pointer-events-none absolute left-5 top-[calc(56.25%-2.5rem)] z-10 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-ink-700 shadow-sm backdrop-blur">
+                <Clock className="h-3 w-3" /> publicada {timeAgo(listing.created_at)}
+              </div>
+            </div>
+          ) : (
+            <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-ink-100 shadow-sm">
               <GrainVisual
                 grainType={listing.grain_type}
                 size="hero"
                 className="h-full w-full"
               />
-            )}
-            <div className="absolute left-5 top-5 flex gap-2">
-              <Badge variant="brand" className="shadow-sm">
-                {grainLabel(listing.grain_type)}
-              </Badge>
-              <Badge variant="success" className="shadow-sm">
-                Activa
-              </Badge>
+              <div className="absolute left-5 top-5 flex gap-2">
+                <Badge variant="brand" className="shadow-sm">
+                  {grainLabel(listing.grain_type)}
+                </Badge>
+                <Badge variant="success" className="shadow-sm">
+                  Activa
+                </Badge>
+              </div>
+              <div className="absolute right-5 top-5 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-ink-700 shadow-sm backdrop-blur">
+                <Clock className="h-3 w-3" /> publicada {timeAgo(listing.created_at)}
+              </div>
             </div>
-            <div className="absolute right-5 top-5 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-ink-700 shadow-sm backdrop-blur">
-              <Clock className="h-3 w-3" /> publicada {timeAgo(listing.created_at)}
-            </div>
-          </div>
+          )}
 
           {/* Título + meta */}
           <header className="mt-8">
@@ -162,17 +180,90 @@ export default async function ListingDetailPage({
             </p>
           </section>
 
+          {/* Q&A público */}
+          <section className="mt-6 rounded-2xl border border-ink-100 bg-white p-7 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">
+                Preguntas y respuestas
+              </h2>
+              <span className="text-xs text-ink-500">
+                {questions.length}{" "}
+                {questions.length === 1 ? "pregunta" : "preguntas"}
+              </span>
+            </div>
+
+            {questions.length > 0 && (
+              <ul className="mt-5 divide-y divide-ink-100">
+                {questions.map((q) => (
+                  <li key={q.id} className="py-4 first:pt-0 last:pb-0">
+                    <p className="flex items-start gap-3">
+                      <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink-100 text-xs font-semibold text-ink-700">
+                        P
+                      </span>
+                      <span className="flex-1">
+                        <span className="text-[15px] text-ink-900">
+                          {q.question}
+                        </span>
+                        <span className="ml-2 text-[11px] text-ink-400">
+                          — {q.asker_name} · {timeAgo(q.asked_at)}
+                        </span>
+                      </span>
+                    </p>
+                    {q.answer ? (
+                      <p className="mt-3 flex items-start gap-3">
+                        <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-700 text-xs font-semibold text-white">
+                          R
+                        </span>
+                        <span className="flex-1">
+                          <span className="text-[15px] text-ink-700">
+                            {q.answer}
+                          </span>
+                          {q.answered_at && (
+                            <span className="ml-2 text-[11px] text-ink-400">
+                              — vendedor · {timeAgo(q.answered_at)}
+                            </span>
+                          )}
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="ml-9 mt-2 text-[11px] italic text-ink-400">
+                        Esperando respuesta del vendedor.
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <form className="mt-6 flex flex-col gap-2 border-t border-ink-100 pt-5 sm:flex-row sm:items-center">
+              <Textarea
+                rows={2}
+                placeholder="Hacé una pregunta pública sobre esta publicación..."
+                className="flex-1"
+              />
+              <Button type="submit" size="md" className="shrink-0">
+                Preguntar
+              </Button>
+            </form>
+            <p className="mt-2 text-[11px] text-ink-500">
+              Las preguntas y respuestas son visibles para todos los compradores.
+            </p>
+          </section>
+
           {/* Vendedor */}
           <section className="mt-6 rounded-2xl border border-ink-100 bg-white p-7 shadow-sm">
             <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">
               Vendedor
             </h2>
-            <div className="mt-5 flex items-start gap-4">
+            <Link
+              href={`/u/${listing.user_id}`}
+              className="group mt-5 flex items-start gap-4 rounded-xl p-2 -m-2 transition-colors hover:bg-ink-50"
+            >
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-100 text-brand-700 ring-4 ring-brand-50">
                 <Building2 className="h-6 w-6" />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-ink-900">
+                <p className="font-medium text-ink-900 group-hover:underline">
                   {listing.seller?.full_name}
                 </p>
                 <p className="mt-0.5 text-sm text-ink-500">
@@ -185,9 +276,12 @@ export default async function ListingDetailPage({
                     <ShieldCheck className="mr-1 h-3 w-3" />
                     Verificado
                   </Badge>
+                  <span className="text-xs text-ink-500 underline-offset-4 group-hover:underline">
+                    Ver perfil →
+                  </span>
                 </div>
               </div>
-            </div>
+            </Link>
           </section>
 
           {/* Relacionados */}
@@ -204,6 +298,11 @@ export default async function ListingDetailPage({
               </div>
             </section>
           )}
+
+          {/* Reportar */}
+          <div className="mt-10 flex justify-end">
+            <ReportButton target="listing" />
+          </div>
         </article>
 
         {/* Buy box — patrón Amazon: panel sticky con CTA prominente */}

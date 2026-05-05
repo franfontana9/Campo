@@ -5,7 +5,7 @@ import { GRAIN_TYPES } from "@/lib/constants";
 export function Footer() {
   return (
     <footer className="mt-20 border-t border-ink-100 bg-ink-50">
-      <div className="mx-auto max-w-6xl px-6 py-12">
+      <div className="mx-auto w-full max-w-[1440px] px-6 py-12 lg:px-10">
         <div className="grid gap-10 md:grid-cols-[1.4fr_3fr]">
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5">

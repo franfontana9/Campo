@@ -1,4 +1,388 @@
-import type { Listing } from "./types";
+import type { Interest, Listing, Profile } from "./types";
+
+/**
+ * Usuario "logueado" simulado. Cuando se conecte Supabase Auth, esto se
+ * reemplaza por `await supabase.auth.getUser()`.
+ *
+ * Coincide con uno de los seller_id en MOCK_LISTINGS, así el dashboard
+ * muestra publicaciones e intereses como si fueran del usuario actual.
+ */
+export const CURRENT_USER: Profile = {
+  id: "u1",
+  full_name: "Agro del Sur SRL",
+  phone: "+54 358 412 7788",
+  country: "AR",
+  region: "Córdoba",
+  city: "Río Cuarto",
+  user_type: "both",
+  role: "user",
+  created_at: "2025-09-12T10:00:00Z",
+};
+
+/**
+ * Intereses mock: incluyen los recibidos (sobre publicaciones del CURRENT_USER)
+ * y los enviados (donde CURRENT_USER es el buyer).
+ */
+export const MOCK_INTERESTS: (Interest & {
+  buyer?: Pick<Profile, "id" | "full_name" | "country" | "region" | "city">;
+})[] = [
+  // Recibidos: alguien interesado en publicación 1 (de CURRENT_USER)
+  {
+    id: "i1",
+    listing_id: "1",
+    buyer_id: "u4",
+    message:
+      "Hola, nos interesan los 500 t. ¿Podemos coordinar entrega en Quequén? Necesitamos confirmación de calidad por análisis externo.",
+    status: "pending",
+    created_at: "2026-04-22T18:30:00Z",
+    buyer: {
+      id: "u4",
+      full_name: "Midwest Grain Traders LLC",
+      country: "US",
+      region: "Iowa",
+      city: "Des Moines",
+    },
+  },
+  {
+    id: "i2",
+    listing_id: "1",
+    buyer_id: "u14",
+    message:
+      "Estamos comprando soja para exportación. Pagamos al levantar contra BL. Avisame disponibilidad real.",
+    status: "accepted",
+    created_at: "2026-04-21T11:15:00Z",
+    buyer: {
+      id: "u14",
+      full_name: "Agro Itapúa SA",
+      country: "PY",
+      region: "Itapúa",
+      city: "Encarnación",
+    },
+  },
+  {
+    id: "i3",
+    listing_id: "1",
+    buyer_id: "u2",
+    message: "Interesa para mezcla. ¿Tenés análisis reciente de proteína?",
+    status: "declined",
+    created_at: "2026-04-20T08:00:00Z",
+    buyer: {
+      id: "u2",
+      full_name: "Fazenda Esperança Ltda",
+      country: "BR",
+      region: "Mato Grosso",
+      city: "Sorriso",
+    },
+  },
+  // Enviados: CURRENT_USER mostrando interés en publicaciones de otros
+  {
+    id: "i4",
+    listing_id: "5",
+    buyer_id: CURRENT_USER.id,
+    message:
+      "Hola Don Ernesto, nos interesa el maíz. ¿Es posible despachar en mayo o junio? ¿Tienen análisis de humedad?",
+    status: "pending",
+    created_at: "2026-04-22T09:00:00Z",
+  },
+  {
+    id: "i5",
+    listing_id: "9",
+    buyer_id: CURRENT_USER.id,
+    message:
+      "Buenas, vemos el lote de cebada. Estamos cerrando contrato con maltería local — necesitamos definir antes del viernes.",
+    status: "accepted",
+    created_at: "2026-04-21T14:20:00Z",
+  },
+  {
+    id: "i6",
+    listing_id: "13",
+    buyer_id: CURRENT_USER.id,
+    message: "Consulta por trigo APW: ¿FOB Perth o pueden CIF a Buenos Aires?",
+    status: "pending",
+    created_at: "2026-04-19T16:45:00Z",
+  },
+];
+
+/**
+ * Notificaciones in-app del usuario actual.
+ */
+export type Notification = {
+  id: string;
+  type: "interest_received" | "interest_accepted" | "interest_declined" | "new_message" | "system";
+  title: string;
+  body: string;
+  href: string;
+  created_at: string;
+  read: boolean;
+};
+
+export const MOCK_NOTIFICATIONS: Notification[] = [
+  {
+    id: "n1",
+    type: "interest_received",
+    title: "Nuevo interés en tu publicación",
+    body: "Midwest Grain Traders LLC mostró interés en 500 t de soja.",
+    href: "/dashboard/intereses-recibidos",
+    created_at: "2026-04-22T18:30:00Z",
+    read: false,
+  },
+  {
+    id: "n2",
+    type: "new_message",
+    title: "Mensaje nuevo de Don Ernesto e Hijos",
+    body: "«Tenemos disponible para mayo, ¿pasamos número por mail?»",
+    href: "/dashboard/chats/c2",
+    created_at: "2026-04-22T16:10:00Z",
+    read: false,
+  },
+  {
+    id: "n3",
+    type: "interest_accepted",
+    title: "Estancia La Providencia aceptó tu interés",
+    body: "Cebada cervecera Tandil — coordiná entrega antes del viernes.",
+    href: "/dashboard/intereses-enviados",
+    created_at: "2026-04-21T14:25:00Z",
+    read: true,
+  },
+  {
+    id: "n4",
+    type: "interest_received",
+    title: "Nuevo interés en tu publicación",
+    body: "Agro Itapúa SA quiere 500 t de soja para exportación.",
+    href: "/dashboard/intereses-recibidos",
+    created_at: "2026-04-21T11:15:00Z",
+    read: true,
+  },
+  {
+    id: "n5",
+    type: "system",
+    title: "Tu publicación está activa",
+    body: "500 t de soja en Río Cuarto ya aparece en el marketplace.",
+    href: "/dashboard/publicaciones",
+    created_at: "2026-04-18T12:05:00Z",
+    read: true,
+  },
+];
+
+/**
+ * Hilos de chat — uno por publicación cuando hubo interés.
+ * En el modelo final viene de Supabase: chats(listing_id, buyer_id, seller_id)
+ * + messages(chat_id, author_id, body, created_at).
+ */
+export type ChatMessage = {
+  id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+};
+
+export type ChatThread = {
+  id: string;
+  listing_id: string;
+  // Otra parte del chat (ya sea buyer o seller, depende de quién mira)
+  counterparty: {
+    id: string;
+    full_name: string;
+    country: string;
+    region: string;
+    city: string;
+  };
+  // Si CURRENT_USER es vendedor o comprador en este hilo
+  my_role: "seller" | "buyer";
+  status: "open" | "closed";
+  unread: number;
+  last_message_at: string;
+  messages: ChatMessage[];
+};
+
+export const MOCK_CHATS: ChatThread[] = [
+  {
+    id: "c1",
+    listing_id: "1",
+    counterparty: {
+      id: "u4",
+      full_name: "Midwest Grain Traders LLC",
+      country: "US",
+      region: "Iowa",
+      city: "Des Moines",
+    },
+    my_role: "seller",
+    status: "open",
+    unread: 2,
+    last_message_at: "2026-04-22T18:45:00Z",
+    messages: [
+      {
+        id: "m1",
+        author_id: "u4",
+        body: "Hola, nos interesan los 500 t. ¿Podemos coordinar entrega en Quequén?",
+        created_at: "2026-04-22T18:30:00Z",
+      },
+      {
+        id: "m2",
+        author_id: "u1",
+        body: "Hola, sí. Tenemos disponibilidad. ¿Necesitan análisis de calidad antes?",
+        created_at: "2026-04-22T18:35:00Z",
+      },
+      {
+        id: "m3",
+        author_id: "u4",
+        body: "Sí por favor. ¿Pueden mandar por mail? Y nos cierran fecha de entrega tentativa.",
+        created_at: "2026-04-22T18:42:00Z",
+      },
+      {
+        id: "m4",
+        author_id: "u4",
+        body: "Te paso el contacto del responsable de logística también: john@midwestgrain.com",
+        created_at: "2026-04-22T18:45:00Z",
+      },
+    ],
+  },
+  {
+    id: "c2",
+    listing_id: "5",
+    counterparty: {
+      id: "u5",
+      full_name: "Don Ernesto e Hijos",
+      country: "AR",
+      region: "Entre Ríos",
+      city: "Paraná",
+    },
+    my_role: "buyer",
+    status: "open",
+    unread: 1,
+    last_message_at: "2026-04-22T16:10:00Z",
+    messages: [
+      {
+        id: "m5",
+        author_id: "u1",
+        body: "Hola Don Ernesto, nos interesa el maíz. ¿Es posible despachar en mayo o junio?",
+        created_at: "2026-04-22T09:00:00Z",
+      },
+      {
+        id: "m6",
+        author_id: "u5",
+        body: "Hola Fran, sí, tenemos disponible para mayo. Humedad 14%.",
+        created_at: "2026-04-22T15:20:00Z",
+      },
+      {
+        id: "m7",
+        author_id: "u5",
+        body: "Tenemos disponible para mayo, ¿pasamos número por mail?",
+        created_at: "2026-04-22T16:10:00Z",
+      },
+    ],
+  },
+  {
+    id: "c3",
+    listing_id: "9",
+    counterparty: {
+      id: "u9",
+      full_name: "Estancia La Providencia",
+      country: "AR",
+      region: "Buenos Aires",
+      city: "Tandil",
+    },
+    my_role: "buyer",
+    status: "open",
+    unread: 0,
+    last_message_at: "2026-04-21T14:30:00Z",
+    messages: [
+      {
+        id: "m8",
+        author_id: "u1",
+        body: "Buenas, vemos el lote de cebada. Estamos cerrando contrato con maltería local.",
+        created_at: "2026-04-21T14:20:00Z",
+      },
+      {
+        id: "m9",
+        author_id: "u9",
+        body: "Excelente. Aceptado. Pasame los datos por mail y coordinamos.",
+        created_at: "2026-04-21T14:30:00Z",
+      },
+    ],
+  },
+];
+
+/**
+ * Q&A público en publicaciones — preguntas que cualquier comprador puede
+ * hacer y el vendedor responde, queda visible para todos.
+ */
+export type Question = {
+  id: string;
+  listing_id: string;
+  asker_name: string;
+  question: string;
+  answer: string | null;
+  asked_at: string;
+  answered_at: string | null;
+};
+
+export const MOCK_QUESTIONS: Question[] = [
+  {
+    id: "q1",
+    listing_id: "1",
+    asker_name: "Comprador anónimo",
+    question: "¿Tienen análisis de proteína disponible?",
+    answer:
+      "Sí, hicimos análisis hace 3 días — 38% proteína / 18,5% materia grasa. Lo mando por mail si interesa.",
+    asked_at: "2026-04-21T10:00:00Z",
+    answered_at: "2026-04-21T11:30:00Z",
+  },
+  {
+    id: "q2",
+    listing_id: "1",
+    asker_name: "Cooperativa del Sur",
+    question: "¿Pueden despachar 200 t y dejar el resto para junio?",
+    answer:
+      "Podemos hablarlo. Pasame el detalle de logística y armamos la operación en dos entregas.",
+    asked_at: "2026-04-20T15:00:00Z",
+    answered_at: "2026-04-20T16:45:00Z",
+  },
+  {
+    id: "q3",
+    listing_id: "1",
+    asker_name: "Trader independiente",
+    question: "¿El precio es FOB o sobre camión en planta?",
+    answer: null,
+    asked_at: "2026-04-22T09:30:00Z",
+    answered_at: null,
+  },
+];
+
+/**
+ * Galería mock por publicación — permite la grilla de fotos en el detalle
+ * cuando el listing tiene `image_url`. Si no, se usa GrainVisual.
+ */
+export function getListingGallery(listingId: string): string[] {
+  // Cuando haya upload real viene de Supabase Storage. Por ahora rotamos un
+  // set de fotos verificadas según el id, para que cada publicación muestre
+  // un orden distinto pero estable.
+  const pool = ["wheat-01.jpg", "farm-01.jpg", "wheat-03.jpg"];
+  const offset = [...listingId].reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return pool
+    .map((_, i) => pool[(i + offset) % pool.length])
+    .map((f) => `/images/grains/${f}`);
+}
+
+/**
+ * Stats del usuario actual sobre los mocks. Cuando se conecte Supabase se
+ * reemplaza por queries con auth.uid().
+ */
+export function getUserStats() {
+  const myListings = MOCK_LISTINGS.filter((l) => l.user_id === CURRENT_USER.id);
+  const activeListings = myListings.filter((l) => l.status === "active");
+  const myListingIds = new Set(myListings.map((l) => l.id));
+  const received = MOCK_INTERESTS.filter((i) => myListingIds.has(i.listing_id));
+  const sent = MOCK_INTERESTS.filter((i) => i.buyer_id === CURRENT_USER.id);
+  return {
+    activeListings: activeListings.length,
+    totalListings: myListings.length,
+    receivedPending: received.filter((i) => i.status === "pending").length,
+    receivedTotal: received.length,
+    sentPending: sent.filter((i) => i.status === "pending").length,
+    sentTotal: sent.length,
+  };
+}
 
 /**
  * Stats de marketplace calculados sobre los mocks. Cuando se conecte Supabase

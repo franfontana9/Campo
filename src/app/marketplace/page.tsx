@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 import { ListingCard } from "@/components/listings/ListingCard";
 import { ListingFilters } from "@/components/listings/ListingFilters";
 import { ListingFiltersMobile } from "@/components/listings/ListingFiltersMobile";
+import { SaveSearchButton } from "@/components/listings/SaveSearchButton";
 import { Reveal } from "@/components/effects/Reveal";
 import { MOCK_LISTINGS, getMarketplaceStats } from "@/lib/mock-data";
 import { countryLabel, GRAIN_TYPES, PRICE_MODES } from "@/lib/constants";
@@ -117,8 +118,16 @@ export default async function MarketplacePage({
   const chips = activeChips(sp);
   const stats = getMarketplaceStats();
 
+  // Querystring serializado para guardar la búsqueda actual
+  const qsParams = new URLSearchParams();
+  Object.entries(sp).forEach(([k, v]) => {
+    if (v) qsParams.set(k, v);
+  });
+  const qsString = qsParams.toString();
+  const savedLabel = chips.map((c) => c.label).join(" · ") || "Sin filtros";
+
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12">
+    <div className="mx-auto w-full max-w-[1440px] px-6 py-12 lg:px-10">
       <header className="mb-10 border-b border-ink-100 pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">
           Marketplace
@@ -131,32 +140,41 @@ export default async function MarketplacePage({
           grano, país o volumen.
         </p>
 
-        {/* Activity bar */}
-        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-          <span className="inline-flex items-center gap-2">
-            <Circle className="h-2 w-2 animate-pulse fill-brand-600 text-brand-600" />
-            <span className="font-medium text-ink-900">
-              {stats.activeCount}
-            </span>{" "}
-            <span className="text-ink-500">publicaciones activas</span>
-          </span>
-          <span className="text-ink-300">·</span>
-          <span className="text-ink-600">
-            <span className="font-medium text-ink-900">{stats.newToday}</span>{" "}
-            nuevas hoy
-          </span>
-          {stats.latestAt && (
-            <>
-              <span className="text-ink-300">·</span>
-              <span className="text-ink-500">
-                última {timeAgo(stats.latestAt)}
-              </span>
-            </>
-          )}
+        {/* Activity bar + save search */}
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+            <span className="inline-flex items-center gap-2">
+              <Circle className="h-2 w-2 animate-pulse fill-brand-600 text-brand-600" />
+              <span className="font-medium text-ink-900">
+                {stats.activeCount}
+              </span>{" "}
+              <span className="text-ink-500">publicaciones activas</span>
+            </span>
+            <span className="text-ink-300">·</span>
+            <span className="text-ink-600">
+              <span className="font-medium text-ink-900">
+                {stats.newToday}
+              </span>{" "}
+              nuevas hoy
+            </span>
+            {stats.latestAt && (
+              <>
+                <span className="text-ink-300">·</span>
+                <span className="text-ink-500">
+                  última {timeAgo(stats.latestAt)}
+                </span>
+              </>
+            )}
+          </div>
+          <SaveSearchButton
+            searchString={qsString}
+            label={savedLabel}
+            hasFilters={chips.length > 0}
+          />
         </div>
       </header>
 
-      <div className="grid gap-10 md:grid-cols-[260px_1fr]">
+      <div className="grid gap-10 md:grid-cols-[260px_1fr] xl:gap-14">
         <aside className="hidden md:sticky md:top-24 md:block md:self-start">
           <ListingFilters />
         </aside>
@@ -213,7 +231,7 @@ export default async function MarketplacePage({
               </Link>
             </div>
           ) : (
-            <div className="grid gap-7 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-7 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {listings.map((l, i) => (
                 <Reveal key={l.id} delay={Math.min(i, 8) * 60}>
                   <ListingCard listing={l} />

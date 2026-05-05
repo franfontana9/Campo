@@ -8,11 +8,12 @@ Backlog vivo de features y mejoras del producto. Se organiza por bloque y priori
 
 Sin esto los flujos del producto no cierran.
 
-- [ ] **Auth real con Supabase** — signup, login, logout, callback de email.
-- [ ] **Server actions CRUD de publicaciones** — crear, editar, cambiar estado, eliminar.
+- [ ] **Auth real con Supabase** — signup, login, logout, callback de email. *(UI de login/register existe, falta cableado)*
+- [ ] **Server actions CRUD de publicaciones** — crear, editar, cambiar estado, eliminar. *(form de nueva existe; `/dashboard/publicaciones/[id]/editar` sigue siendo placeholder)*
 - [ ] **Reemplazar `MOCK_LISTINGS`** por queries reales con filtros server-side.
-- [ ] **Sistema de intereses end-to-end** — `/dashboard/intereses-recibidos`, `/intereses-enviados`, cambio de estado por el vendedor.
-- [ ] **Perfil editable** — el usuario tiene que poder actualizar su info post-signup.
+- [x] **Sistema de intereses — UI completa** — `/dashboard/intereses-recibidos`, `/intereses-enviados`, vista por publicación con accept/decline.
+  - [ ] Persistencia: botones Aceptar/Rechazar son visuales, falta server action que cambie status y abra chat.
+- [ ] **Perfil editable** — el usuario tiene que poder actualizar su info post-signup. *(UI lista en `/dashboard/perfil`, falta save action)*
 - [ ] **Cuenta de prueba / demo** — usuario `demo@campo.test` con publicaciones e intereses precargados, para showcasing y QA.
 
 ---
@@ -21,19 +22,18 @@ Sin esto los flujos del producto no cierran.
 
 Lo que hace que el otro lado se anime a operar.
 
-- [ ] **Perfiles públicos del usuario** (`/u/[handle]` o `/empresa/[id]`):
-  - razón social + logo (cuando exista upload)
-  - ubicación
-  - a qué se dedica (productor / acopio / cooperativa / corredor / exportador / molino / fábrica de balanceado)
-  - antigüedad en Campo
-  - listado de publicaciones activas + cerradas
-  - resumen de actividad (operaciones cerradas, tiempo de respuesta)
+- [x] **Perfiles públicos del usuario** (`/u/[id]`) — UI lista:
+  - razón social + avatar (logo cuando haya upload)
+  - ubicación, antigüedad
+  - mini-stats (publicaciones activas, cerradas, intereses recibidos, tiempo de respuesta)
+  - listado de publicaciones activas
+  - "a qué se dedica" — placeholder textual; falta campo `bio` real en `profiles`
 - [ ] **Verificación de cuenta** — niveles:
   - Email verificado (automático)
-  - Empresa verificada (CUIT / CNPJ / Tax ID + revisión manual)
+  - Empresa verificada (CUIT / CNPJ / Tax ID + revisión manual) *(badge visual existe, sin lógica real)*
   - "Verified seller" con histórico de operaciones cerradas
 - [ ] **Comentarios / reseñas post-operación** — sólo entre partes que efectivamente cerraron una operación (evita spam/manipulación).
-- [ ] **Reportar publicación / usuario** — botón discreto en detalle + perfil, va a admin moderation.
+- [x] **Reportar publicación / usuario** — `<ReportButton>` en detalle de publicación + perfil. *(UI; falta destino de moderación)*
 
 ---
 
@@ -41,13 +41,14 @@ Lo que hace que el otro lado se anime a operar.
 
 Pasar del "Me interesa" estático a una conversación real.
 
-- [ ] **Chat por publicación** — cuando hay un interés enviado o recibido, abre un hilo persistente entre las partes. Estados: pendiente, en conversación, cerrada, rechazada.
-- [ ] **Menu de chats activos** en el navbar (junto a notificaciones) — listado de hilos con contador de no leídos.
-- [ ] **Notificaciones in-app** — campana en el navbar:
-  - Nuevo interés recibido en mi publicación
-  - Respuesta en un chat
-  - Cambio de estado de mi interés
-  - Publicación a punto de expirar
+- [x] **Chat por publicación — UI** — listado en `/dashboard/chats` y thread en `/dashboard/chats/[id]`. Cabecera muestra contraparte + publicación + atajos "Ver intereses" / "Ver pública".
+  - [ ] Persistencia real (Supabase tables `chats` + `messages`); composer no envía nada todavía.
+  - [ ] Estados del hilo: pendiente, en conversación, cerrada, rechazada.
+- [x] **Menu de chats activos en navbar** — ícono con badge de no leídos linkea a `/dashboard/chats`.
+- [x] **Notificaciones in-app — campana en navbar** — `<NotificationsBell>` con dropdown y página `/dashboard/notificaciones`.
+  - Tipos cubiertos: `interest_received`, `interest_accepted`, `interest_declined`, `new_message`, `system`.
+  - [ ] Cableado real: hoy lee de `MOCK_NOTIFICATIONS`; falta tabla + triggers desde server actions.
+  - [ ] "Marcar todas como leídas" no hace nada todavía.
 - [ ] **Notificaciones email** (opcional, configurable):
   - Nuevo interés
   - Respuesta sin leer hace > 24h
@@ -113,12 +114,12 @@ Pasar del "Me interesa" estático a una conversación real.
 
 ## 7. Soporte y onboarding
 
-- [ ] **Panel de Ayuda / Soporte** — `/ayuda`:
+- [ ] **Panel de Ayuda / Soporte** — `/ayuda` *(página existe con FAQ base; falta escalar a 30+ artículos + búsqueda)*:
   - Centro de ayuda con artículos por tema (publicar, cobrar, verificar, etc.)
   - FAQ ampliada (la actual tiene 6 entradas en landing — escalar a 30+ acá)
   - Búsqueda
-- [ ] **Contacto** — formulario simple + email/WhatsApp para casos no resueltos por la ayuda.
-- [ ] **Onboarding del primer login** — mini tutorial de 3 pantallas la primera vez.
+- [x] **Contacto** — `/contacto` con formulario y links de canal. *(UI; falta endpoint de envío)*
+- [x] **Onboarding del primer login** — `<Onboarding>` en root layout, mini tutorial.
 - [ ] **Tips contextuales** — micro-help en formularios densos (nueva publicación).
 
 ---
@@ -130,6 +131,132 @@ Pasar del "Me interesa" estático a una conversación real.
 - [ ] **Scripts de migración** si el schema evoluciona.
 - [ ] **CI/CD básico** en GitHub Actions: lint + typecheck + build en PRs.
 - [ ] **Branch protection** en `main`.
+
+---
+
+## 9. Visual / UX — pulir cada pantalla
+
+Bloque transversal: mejorar feel y claridad en cada vista. Listado por pantalla con ideas concretas (no "hacerlo más lindo").
+
+### Landing (`/`)
+- [ ] **Hero más vivo** — el ticker existe pero está abajo; subir un mini-feed de "última publicación" pegado al hero (tipo "hace 12 min · 500 t soja Río Cuarto").
+- [ ] **Mapa global de actividad** — globe interactivo o mapa estilizado mostrando dónde está la oferta activa hoy (puntitos por país con tooltip).
+- [ ] **Testimonials con foto/empresa** — un slot debajo del "Cómo funciona", aunque sean 2-3 mocks por ahora.
+- [ ] **Animación de números** en stats (count-up cuando entran en viewport).
+- [ ] **CTA flotante sticky** en mobile cuando se hace scroll abajo del hero.
+
+### Marketplace (`/marketplace`)
+- [ ] **Vista mapa** alterna a la grilla — toggle "Lista / Mapa" con pins por publicación.
+- [ ] **Skeletons** mientras carga (hoy va sync porque es mock; reservar el espacio para evitar layout shift cuando sea async).
+- [ ] **Sort visual** — el sort actual es un `<Select>` pleno; chips horizontales con ícono ("Más recientes", "Precio ↑", "Más volumen") leen mejor.
+- [ ] **Filtros aplicados como chips** ya está, pero los chips podrían mostrar el color del grano correspondiente.
+- [ ] **Empty state ilustrado** — cuando no hay resultados, sugerir "probá quitar el filtro X" basado en el filtro más restrictivo.
+- [ ] **Comparador** — botón "Comparar" en cada card; al seleccionar 2-3 abre overlay con diff lado a lado (precio/t, total, entrega, distancia).
+- [ ] **Distancia desde mi ubicación** en cada card si el usuario tiene perfil con `country/region/city`.
+- [ ] **Indicador "nuevo"** (publicado hace < 24 h) más prominente, no solo el `timeAgo` chico.
+
+### Detalle de publicación (`/marketplace/[id]`)
+- [ ] **Sticky header** al hacer scroll: mini-versión de título + precio + "Me interesa".
+- [ ] **Galería con zoom y swipe** — el `ListingGallery` ya está pero falta lightbox modal. Verificar UX en mobile.
+- [ ] **Mapa de origen** embebido (Mapbox/Leaflet) con pin sobre `city`.
+- [ ] **Análisis de calidad / fichas técnicas** en pestaña adicional (Humedad, Proteína, PH, etc. — schema flexible para distintos granos).
+- [ ] **"Calculadora rápida"** en el buy box: input de tonelaje deseado → recalcula total estimado.
+- [ ] **Histórico de precios del mismo grano** en gráfico chico (sparkline) — relevante para decidir si la oferta está cara/barata.
+- [ ] **Mostrar otras publicaciones del mismo vendedor** abajo, además de las del mismo grano.
+
+### Dashboard resumen (`/dashboard`)
+- [ ] **Saludo contextual por hora** ("Buenas, Fran" + "buen día/tarde/noche").
+- [ ] **Gráfico de actividad** de los últimos 14 días (line chart de intereses recibidos por día).
+- [ ] **Notificaciones inline** arriba del checklist cuando hay 1+ intereses pendientes urgentes (ej. > 48 h sin responder).
+- [ ] **Streaks / hábitos** — "Llevás 5 días publicando" tipo Duolingo (gamificación liviana, opcional).
+
+### Mis publicaciones (`/dashboard/publicaciones`)
+- [ ] **Vista grilla / tabla** alterna a la lista — toggle.
+- [ ] **Bulk actions** — checkbox por fila + "pausar X publicaciones" / "marcar como cerradas".
+- [ ] **Ordenar** por más intereses, más viejo, próximo a expirar.
+- [ ] **Indicador de salud** por publicación: verde (interés activo, mensajes respondidos), amarillo (intereses pendientes > 24 h), rojo (sin actividad en 7+ días).
+- [ ] **Duplicar publicación** como atajo cuando es zafra repetida.
+
+### Detalle publicación dashboard (`/dashboard/publicaciones/[id]`) — *recién creado*
+- [ ] **Tabs** para separar "Intereses / Chats / Q&A / Stats" cuando crezca el contenido.
+- [ ] **Gráfico de embudo** vistas → intereses → chats → cerrado.
+- [ ] **Acción inline**: responder Q&A pendientes desde acá, no redirigir a la pública.
+
+### Editar publicación (`/dashboard/publicaciones/[id]/editar`)
+- [ ] **Pasar de placeholder a form real** (depende de server actions de bloque 1).
+- [ ] **Auto-guardado de draft** cada N segundos.
+- [ ] **Vista previa** del cambio antes de aplicar (split: form / preview de cómo se va a ver en el marketplace).
+- [ ] **Historial de cambios** ("editado hace 2 días: precio 410 → 420 USD").
+
+### Nueva publicación (`/dashboard/publicaciones/nueva`)
+- [ ] **Wizard de 3 pasos** en lugar de form único largo: (1) Grano + cantidad, (2) Ubicación + entrega, (3) Precio + descripción.
+- [ ] **Estimador de precio sugerido** basado en publicaciones recientes del mismo grano + país.
+- [ ] **Validación inline** con mensajes específicos (no genéricos "campo requerido").
+- [ ] **Plantillas** — "Volver a usar datos de mi última publicación".
+- [ ] **Upload de imágenes con drag-and-drop** + preview.
+
+### Intereses recibidos / enviados
+- [ ] **Búsqueda** dentro de la bandeja (por nombre de comprador, ciudad, contenido del mensaje).
+- [ ] **Filtros combinados** (estado + grano + país de la contraparte).
+- [ ] **Vista agrupada por publicación** como alternativa al listado plano.
+- [ ] **Quick reply** desde la card sin entrar al chat.
+- [ ] **Plantillas de respuesta** ("Sí, tenemos disponible", "Pasame tu mail" con un click).
+
+### Chats (`/dashboard/chats` y `[id]`)
+- [ ] **Búsqueda dentro del hilo** y entre hilos.
+- [ ] **Indicador de leído** (✓ / ✓✓) y "escribiendo…".
+- [ ] **Adjuntos** — foto del lote, análisis PDF, certificado de origen.
+- [ ] **Mensaje de sistema** cuando se cambia el estado del interés ("Vendedor aceptó tu interés").
+- [ ] **Pin a mensaje importante** y/o "convertir mensaje en nota".
+- [ ] **Resumen del hilo** al inicio: lo que se acordó hasta ahora (puede ser AI-generated más adelante).
+- [ ] **Mobile**: composer fijo abajo + lista colapsable estilo WhatsApp.
+
+### Notificaciones (`/dashboard/notificaciones`)
+- [ ] **Agrupar por día** ("Hoy", "Ayer", "Esta semana").
+- [ ] **Filtros por tipo** (intereses, mensajes, sistema).
+- [ ] **Acción inline** en cada notificación (aceptar/rechazar interés sin tener que entrar a la otra página).
+- [ ] **Configuración de preferencias** — qué notificar, qué silenciar.
+
+### Búsquedas guardadas (`/dashboard/busquedas`)
+- [ ] **Alertas** — "avisame cuando aparezca una nueva publicación que matchee" (email/in-app).
+- [ ] **Conteo de coincidencias actuales** por búsqueda guardada.
+- [ ] **Renombrar / reordenar** búsquedas.
+
+### Mi perfil (`/dashboard/perfil`)
+- [ ] **Upload de logo / avatar** (Supabase Storage).
+- [ ] **Preview en vivo** de cómo se ve el perfil público mientras se edita.
+- [ ] **Progreso de completitud** ("Tu perfil está 70% completo — sumá X para verificarte").
+- [ ] **Validación de teléfono** vía SMS o WhatsApp.
+
+### Perfil público (`/u/[id]`)
+- [ ] **Botón "Contactar"** directo (depende de auth + chats).
+- [ ] **Tab de reseñas** cuando exista el sistema.
+- [ ] **Cover image** custom (no solo el gradiente).
+- [ ] **Compartir perfil** (link directo + WhatsApp share).
+
+### Auth (`/login`, `/register`)
+- [ ] **OAuth con Google / Apple** además de email.
+- [ ] **Magic link** (passwordless) como opción.
+- [ ] **Indicador de fortaleza de password** en register.
+- [ ] **Recuperar contraseña** flow completo.
+
+### Legales (`/ayuda`, `/contacto`, `/blog`, `/terminos`, `/privacidad`)
+- [ ] **TOC sticky** en docs largos.
+- [ ] **Anchor links copy-on-hover** en cada heading.
+- [ ] **Estimador de tiempo de lectura** en blog.
+- [ ] **Última actualización visible** en términos / privacidad.
+
+### Globales / sistema de diseño
+- [ ] **Dark mode** — el design system ya tiene neutros cálidos; sería natural extenderlo.
+- [ ] **Toasts / notificaciones de acción** consistentes (ej. "Publicación creada", "Interés enviado") — hoy no hay feedback visible post-acción.
+- [ ] **Loading states unificados** — spinner / skeleton consistente entre rutas.
+- [ ] **Estados de error** decentes — hoy `not-found` está pero no hay `error.tsx` por ruta.
+- [ ] **Accesibilidad pass** — focus visible, aria-labels, contraste, navegación por teclado en menús/drawers.
+- [ ] **Internacionalización (i18n)** — hoy todo en español; preparar para PT-BR (Brasil), EN (US/UA/AU) dado el alcance global del marketplace.
+- [ ] **Animaciones de transición entre rutas** (fade/slide leve con Next 15 view transitions).
+- [ ] **Imágenes optimizadas** — auditar `<img>` directos vs `<Image>` de Next; los hero usan `<img>` con `aria-hidden`.
+- [ ] **Empty states con personalidad** — ilustraciones de grano/campo en vez de solo texto.
+- [ ] **Mobile UX pass** — hay `MobileNav` y bottom CTAs en detalle; revisar dashboard sidebar (hoy se apila arriba sin el menú collapsable).
 
 ---
 

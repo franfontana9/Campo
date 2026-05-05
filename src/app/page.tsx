@@ -319,26 +319,58 @@ export default function HomePage() {
 
       {/* CTA final ------------------------------------------------------ */}
       <section className="mx-auto max-w-6xl px-6 pb-24">
-        <div className="relative overflow-hidden rounded-3xl border border-brand-800 bg-brand-800 p-10 text-ink-50 md:p-16">
+        <div className="grid overflow-hidden rounded-3xl border border-ink-100 bg-white shadow-sm md:grid-cols-[5fr_7fr]">
+          {/* Foto */}
+          <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[360px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/grains/wheat-01.jpg"
+              alt=""
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 hidden md:block"
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent 70%, #25301a 100%)",
+              }}
+            />
+          </div>
+
+          {/* Panel CTA */}
           <div
-            aria-hidden
-            className="absolute -right-32 -top-32 h-96 w-96 rounded-full opacity-40 blur-3xl"
+            className="relative flex flex-col justify-center p-10 text-ink-50 md:p-14"
             style={{
               background:
-                "radial-gradient(circle, #a8bc7f 0%, transparent 70%)",
+                "linear-gradient(135deg, #25301a 0%, #3e4f26 60%, #4f632f 100%)",
             }}
-          />
-          <div className="relative">
-            <h2 className="max-w-2xl font-display text-4xl font-medium tracking-tight md:text-5xl">
-              Tu primer lote, <em className="italic text-brand-200">hoy</em>.
-            </h2>
-            <p className="mt-4 max-w-xl text-ink-50/80">
-              Productores, acopios, cooperativas, corredores y compradores.
-              Campo es abierto a todos.
+          >
+            <div
+              aria-hidden
+              className="absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-30 blur-2xl"
+              style={{
+                background: "radial-gradient(circle, #a8bc7f 0%, transparent 70%)",
+              }}
+            />
+            <p className="relative text-xs font-semibold uppercase tracking-[0.16em] text-brand-300">
+              Empezá hoy
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <h2 className="relative mt-3 font-display text-4xl font-medium leading-[1.05] tracking-tight md:text-5xl">
+              Tu primer lote,{" "}
+              <em className="italic text-brand-200">cargado en 2 minutos</em>.
+            </h2>
+            <p className="relative mt-4 max-w-md text-[15px] leading-relaxed text-ink-50/80">
+              Productores, acopios, cooperativas, corredores y compradores.
+              Sin corredores intermedios. Sin comisiones. Abierto a todos.
+            </p>
+            <div className="relative mt-8 flex flex-wrap gap-3">
               <Link href="/register">
-                <Button size="lg" className="bg-ink-50 text-brand-800 hover:bg-white">
+                <Button
+                  size="lg"
+                  className="bg-ink-50 text-brand-800 hover:bg-white"
+                >
                   Crear cuenta gratis
                 </Button>
               </Link>
@@ -352,6 +384,9 @@ export default function HomePage() {
                 </Button>
               </Link>
             </div>
+            <p className="relative mt-6 text-xs text-ink-50/55">
+              Sin tarjeta. Sin comisiones. Cancelá cuando quieras.
+            </p>
           </div>
         </div>
       </section>

@@ -11,6 +11,17 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import {
+  CURRENT_USER,
+  MOCK_CHATS,
+  MOCK_INTERESTS,
+  MOCK_LISTINGS,
+  getUserStats,
+} from "@/lib/mock-data";
+import { countryLabel, grainLabel, LISTING_STATUSES } from "@/lib/constants";
+import type { ListingStatus } from "@/lib/constants";
+import { formatPrice, formatTonnage, timeAgo } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Mi panel",
@@ -18,6 +29,39 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardPage() {
+  const stats = getUserStats();
+  const firstName = CURRENT_USER.full_name.split(" ")[0];
+
+  // Checklist dinámico
+  const steps = [
+    {
+      n: "01",
+      title: "Completá tu perfil",
+      desc: "Razón social, ubicación y contacto. Los compradores quieren saber con quién hablan.",
+      cta: "Editar perfil",
+      href: "/dashboard/perfil",
+      done: CURRENT_USER.full_name.length > 0 && CURRENT_USER.phone.length > 0,
+    },
+    {
+      n: "02",
+      title: "Publicá tu primera oferta",
+      desc: "Cargá grano, toneladas, ubicación y precio. Aparece en el marketplace en segundos.",
+      cta: "Nueva publicación",
+      href: "/dashboard/publicaciones/nueva",
+      done: stats.totalListings > 0,
+      primary: stats.totalListings === 0,
+    },
+    {
+      n: "03",
+      title: "Explorá el marketplace",
+      desc: "Mirá qué se está moviendo en tu grano y región. Es la mejor forma de fijar tu precio.",
+      cta: "Ir al marketplace",
+      href: "/marketplace",
+      done: stats.sentTotal > 0,
+    },
+  ];
+  const doneCount = steps.filter((s) => s.done).length;
+
   return (
     <div>
       <header className="mb-8 border-b border-ink-100 pb-6">
@@ -25,7 +69,7 @@ export default function DashboardPage() {
           Panel
         </p>
         <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-ink-900">
-          Hola, bienvenido
+          Hola, {firstName}
         </h1>
         <p className="mt-2 text-sm text-ink-600">
           Tu actividad en Campo en un vistazo.
@@ -37,64 +81,218 @@ export default function DashboardPage() {
         <Stat
           icon={<FileText className="h-4 w-4" />}
           label="Publicaciones activas"
-          value={0}
+          value={stats.activeListings}
           empty="Sin publicaciones aún"
+          href="/dashboard/publicaciones"
         />
         <Stat
           icon={<Inbox className="h-4 w-4" />}
           label="Intereses recibidos"
-          value={0}
+          value={stats.receivedTotal}
+          hint={
+            stats.receivedPending > 0
+              ? `${stats.receivedPending} sin responder`
+              : undefined
+          }
           empty="Nadie te contactó todavía"
+          href="/dashboard/intereses-recibidos"
         />
         <Stat
           icon={<Send className="h-4 w-4" />}
           label="Intereses enviados"
-          value={0}
+          value={stats.sentTotal}
+          hint={
+            stats.sentPending > 0
+              ? `${stats.sentPending} esperando respuesta`
+              : undefined
+          }
           empty="No mostraste interés todavía"
+          href="/dashboard/intereses-enviados"
         />
       </div>
 
       {/* Primeros pasos */}
-      <section className="mt-10">
-        <div className="mb-4 flex items-end justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">
-              Primeros pasos
-            </p>
-            <h2 className="mt-2 font-display text-2xl font-medium tracking-tight text-ink-900">
-              Empezá a usar Campo
-            </h2>
+      {doneCount < steps.length && (
+        <section className="mt-10">
+          <div className="mb-4 flex items-end justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">
+                Primeros pasos
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-medium tracking-tight text-ink-900">
+                Empezá a usar Campo
+              </h2>
+            </div>
+            <span className="text-sm text-ink-500">
+              {doneCount} / {steps.length}
+            </span>
           </div>
-          <span className="text-sm text-ink-500">0 / 3</span>
+
+          <ol className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-sm">
+            {steps.map((s) => (
+              <Step
+                key={s.n}
+                n={s.n}
+                title={s.title}
+                desc={s.desc}
+                cta={s.cta}
+                href={s.href}
+                done={s.done}
+                primary={s.primary}
+              />
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {/* Actividad reciente — 2 columnas para usar el ancho */}
+      <section className="mt-10 grid gap-6 lg:grid-cols-2">
+        {/* Mis publicaciones recientes con métricas */}
+        <div className="rounded-2xl border border-ink-100 bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">
+              Mis publicaciones
+            </h2>
+            <Link
+              href="/dashboard/publicaciones"
+              className="inline-flex items-center gap-1 text-xs font-medium text-brand-700 hover:text-brand-800"
+            >
+              Ver todas <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          {(() => {
+            const myListings = MOCK_LISTINGS.filter(
+              (l) => l.user_id === CURRENT_USER.id,
+            ).slice(0, 4);
+            if (myListings.length === 0) {
+              return (
+                <div className="p-6 text-center text-sm text-ink-500">
+                  Todavía no publicaste nada.
+                </div>
+              );
+            }
+            return (
+              <ul className="divide-y divide-ink-100">
+                {myListings.map((l) => {
+                  const lInterests = MOCK_INTERESTS.filter(
+                    (i) => i.listing_id === l.id,
+                  );
+                  const pending = lInterests.filter(
+                    (i) => i.status === "pending",
+                  ).length;
+                  const status = LISTING_STATUSES.find(
+                    (s) => s.value === l.status,
+                  );
+                  return (
+                    <li key={l.id}>
+                      <Link
+                        href={`/dashboard/publicaciones/${l.id}`}
+                        className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-ink-50"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <Badge variant="brand">
+                              {grainLabel(l.grain_type)}
+                            </Badge>
+                            {status && (
+                              <Badge variant="neutral">{status.label}</Badge>
+                            )}
+                          </div>
+                          <p className="mt-1.5 truncate text-sm font-medium text-ink-900">
+                            {formatTonnage(l.tonnage)} ·{" "}
+                            {formatPrice(l.price, l.currency)} · {l.city},{" "}
+                            {countryLabel(l.country)}
+                          </p>
+                          <p className="mt-0.5 text-[11px] text-ink-500">
+                            <span
+                              className={
+                                pending > 0
+                                  ? "font-medium text-brand-700"
+                                  : ""
+                              }
+                            >
+                              {lInterests.length}{" "}
+                              {lInterests.length === 1 ? "interés" : "intereses"}
+                              {pending > 0 && ` · ${pending} pendiente${pending === 1 ? "" : "s"}`}
+                            </span>
+                          </p>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-ink-300" />
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            );
+          })()}
         </div>
 
-        <ol className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-sm">
-          <Step
-            n="01"
-            title="Completá tu perfil"
-            desc="Razón social, ubicación y contacto. Los compradores quieren saber con quién hablan."
-            cta="Editar perfil"
-            href="/dashboard"
-            done={false}
-          />
-          <Step
-            n="02"
-            title="Publicá tu primera oferta"
-            desc="Cargá grano, toneladas, ubicación y precio. Aparece en el marketplace en segundos."
-            cta="Nueva publicación"
-            href="/dashboard/publicaciones/nueva"
-            done={false}
-            primary
-          />
-          <Step
-            n="03"
-            title="Explorá el marketplace"
-            desc="Mirá qué se está moviendo en tu grano y región. Es la mejor forma de fijar tu precio."
-            cta="Ir al marketplace"
-            href="/marketplace"
-            done={false}
-          />
-        </ol>
+        {/* Mensajes recientes */}
+        <div className="rounded-2xl border border-ink-100 bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">
+              Mensajes recientes
+            </h2>
+            <Link
+              href="/dashboard/chats"
+              className="inline-flex items-center gap-1 text-xs font-medium text-brand-700 hover:text-brand-800"
+            >
+              Ir a chats <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          {MOCK_CHATS.length === 0 ? (
+            <div className="p-6 text-center text-sm text-ink-500">
+              Sin chats abiertos.
+            </div>
+          ) : (
+            <ul className="divide-y divide-ink-100">
+              {MOCK_CHATS.slice(0, 4).map((c) => {
+                const last = c.messages[c.messages.length - 1];
+                const fromMe = last?.author_id === CURRENT_USER.id;
+                return (
+                  <li key={c.id}>
+                    <Link
+                      href={`/dashboard/chats/${c.id}`}
+                      className="flex items-start gap-3 px-5 py-3 transition-colors hover:bg-ink-50"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-3">
+                          <p
+                            className={`truncate text-sm ${
+                              c.unread > 0
+                                ? "font-semibold text-ink-900"
+                                : "font-medium text-ink-800"
+                            }`}
+                          >
+                            {c.counterparty.full_name}
+                          </p>
+                          <span className="shrink-0 text-[11px] text-ink-500">
+                            {timeAgo(c.last_message_at)}
+                          </span>
+                        </div>
+                        <p
+                          className={`mt-0.5 truncate text-xs ${
+                            c.unread > 0 ? "text-ink-900" : "text-ink-500"
+                          }`}
+                        >
+                          {fromMe && (
+                            <span className="text-ink-400">Vos: </span>
+                          )}
+                          {last?.body}
+                        </p>
+                      </div>
+                      {c.unread > 0 && (
+                        <span className="ml-2 flex h-5 min-w-[20px] shrink-0 items-center justify-center self-center rounded-full bg-brand-700 px-1.5 text-[10px] font-semibold text-white">
+                          {c.unread}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </section>
 
       {/* Atajos */}
@@ -126,14 +324,18 @@ function Stat({
   label,
   value,
   empty,
+  hint,
+  href,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number;
   empty: string;
+  hint?: string;
+  href?: string;
 }) {
-  return (
-    <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-sm">
+  const inner = (
+    <>
       <div className="flex items-center justify-between text-ink-500">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em]">
           {label}
@@ -143,9 +345,30 @@ function Stat({
       <p className="mt-3 font-display text-4xl font-medium tracking-tight text-ink-900">
         {value}
       </p>
-      <p className="mt-1 text-xs text-ink-500">{empty}</p>
-    </div>
+      <p
+        className={`mt-1 text-xs ${
+          hint ? "text-brand-700 font-medium" : "text-ink-500"
+        }`}
+      >
+        {value === 0 ? empty : (hint ?? "—")}
+      </p>
+    </>
   );
+
+  const base =
+    "block rounded-2xl border border-ink-100 bg-white p-5 shadow-sm";
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={`${base} transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-ink-200 hover:shadow-md`}
+      >
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={base}>{inner}</div>;
 }
 
 function Step({
