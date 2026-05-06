@@ -2,7 +2,7 @@
 
 Backlog vivo de features y mejoras del producto. Se organiza por bloque y prioridad relativa, no por fecha. Cuando algo se completa, se marca con `[x]` y se mueve a `decisiones.md` si la decisión fue no-trivial.
 
-> **Última actualización**: 2026-05-05 — sesión de redesign del home + integración con cambios del compañero (Préstamos / Clima / Precios mejorada) + unificación de mapa fase 1. Ver `conversaciones/2026-05-05-home-redesign-y-unificacion-mapa.md`.
+> **Última actualización**: 2026-05-06 — sesión de pasada de UX en dashboard + préstamos + precios + bandeja unificada de intereses + mock data ampliada. Commits `73e00a9` y `f703e78`.
 
 ## ⭐ Top of mind — próximos pasos
 
@@ -16,6 +16,7 @@ Lo que más mueve la aguja para pasar de MVP visual a MVP funcional:
 Limpieza inmediata antes de Auth (≤ 30 min):
 - Borrar `src/components/effects/Onboarding.tsx` — archivo dead code, ya no se importa en ningún lado y todavía dice "sin comisiones".
 - Actualizar copy en `src/app/layout.tsx:49,55` (description metadata + openGraph) que sigue diciendo "Sin corredores, sin comisiones".
+- Coordinar con compañero el fix de `weather-data.ts:116` (`"Río Negro"` duplicado AR/UY).
 
 ---
 
@@ -52,7 +53,7 @@ Sin esto los flujos del producto no cierran.
 - [ ] **Auth real con Supabase** — signup, login, logout, callback de email. *(UI de login/register existe, falta cableado)*
 - [ ] **Server actions CRUD de publicaciones** — crear, editar, cambiar estado, eliminar. *(form de nueva existe; `/dashboard/publicaciones/[id]/editar` sigue siendo placeholder)*
 - [ ] **Reemplazar `MOCK_LISTINGS`** por queries reales con filtros server-side.
-- [x] **Sistema de intereses — UI completa** — `/dashboard/intereses-recibidos`, `/intereses-enviados`, vista por publicación con accept/decline.
+- [x] **Sistema de intereses — UI completa** — `/dashboard/intereses` unificada (sesión 2026-05-06): segmented control Recibidos/Enviados + filtros de status + dot ámbar para pendientes en cada tab. Sidebar consolidado a 1 entry "Intereses" con badge de pendientes total. URLs viejas (`/dashboard/intereses-recibidos`, `/enviados`) hacen redirect 307 preservando `?status`.
   - [ ] Persistencia: botones Aceptar/Rechazar son visuales, falta server action que cambie status y abra chat.
 - [ ] **Perfil editable** — el usuario tiene que poder actualizar su info post-signup. *(UI lista en `/dashboard/perfil`, falta save action)*
 - [ ] **Cuenta de prueba / demo** — usuario `demo@campo.test` con publicaciones e intereses precargados, para showcasing y QA.
@@ -219,16 +220,20 @@ Bloque transversal: mejorar feel y claridad en cada vista. Listado por pantalla 
 
 ### Dashboard resumen (`/dashboard`)
 - [x] **Saludo contextual por hora** — "Buenas noches/Buen día/Buenas tardes" + nombre + fecha completa es-AR (sesión 2026-05-05).
+- [x] **Banner urgent de intereses** — aparece arriba del stats grid cuando hay 1+ intereses recibidos pending hace > 24 h, con nombre del comprador más viejo + CTA "Responder ahora" → `/dashboard/intereses?tipo=recibidos&status=pending` (sesión 2026-05-06).
+- [ ] **Stats con insights, no counts** — reemplazar/complementar las 3 cards de count actuales por: tasa de respuesta · tiempo medio de cierre · valor operado USD. Requiere `accept_at`/`closed_at` en mock (no existen aún).
 - [ ] **Gráfico de actividad** de los últimos 14 días (line chart de intereses recibidos por día).
-- [ ] **Notificaciones inline** arriba del checklist cuando hay 1+ intereses pendientes urgentes (ej. > 48 h sin responder).
 - [ ] **Streaks / hábitos** — "Llevás 5 días publicando" tipo Duolingo (gamificación liviana, opcional).
+- [ ] **Atajos del fondo redundantes** — "Publicar oferta" ya está en el sidebar como botón principal. Considerar sacar la sección "Atajos" o reemplazarla por accesos contextuales según actividad.
 
 ### Mis publicaciones (`/dashboard/publicaciones`)
 - [x] **Indicador de salud** por publicación: `<HealthDot>` con semáforo good/warn/bad calculado por `getListingHealth()` en `lib/utils.ts` — combina edad + intereses pendientes + chats sin leer + actividad reciente. Aparece en el listado y en el detalle (sesión 2026-05-05).
+- [x] **Header arreglado y acciones on-hover** — `h1` ahora dice "Mis publicaciones" + descripción debajo. Banda gris de "Ver pública / Editar" reemplazada por chips text-only que aparecen on-hover en desktop, siempre visibles en touch (sesión 2026-05-06).
 - [ ] **Vista grilla / tabla** alterna a la lista — toggle.
 - [ ] **Bulk actions** — checkbox por fila + "pausar X publicaciones" / "marcar como cerradas".
 - [ ] **Ordenar** por más intereses, más viejo, próximo a expirar.
 - [ ] **Duplicar publicación** como atajo cuando es zafra repetida.
+- [ ] **Tabs con dot de pulse** — el tab "Negociando" debería llevar un dot ámbar cuando tiene chats sin leer.
 
 ### Detalle publicación dashboard (`/dashboard/publicaciones/[id]`) — *recién creado*
 - [ ] **Tabs** para separar "Intereses / Chats / Q&A / Stats" cuando crezca el contenido.
@@ -248,7 +253,10 @@ Bloque transversal: mejorar feel y claridad en cada vista. Listado por pantalla 
 - [ ] **Plantillas** — "Volver a usar datos de mi última publicación".
 - [ ] **Upload de imágenes con drag-and-drop** + preview.
 
-### Intereses recibidos / enviados
+### Intereses (`/dashboard/intereses`) — *Bandeja unificada*
+
+> Sesión 2026-05-06: las dos páginas separadas (`/intereses-recibidos` y `/intereses-enviados`) se fusionaron en una sola con segmented control Recibidos/Enviados + chips de status. Sidebar muestra una entrada "Intereses" con badge de pendientes total. URLs viejas redirigen 307.
+
 - [ ] **Búsqueda** dentro de la bandeja (por nombre de comprador, ciudad, contenido del mensaje).
 - [ ] **Filtros combinados** (estado + grano + país de la contraparte).
 - [ ] **Vista agrupada por publicación** como alternativa al listado plano.
@@ -256,17 +264,21 @@ Bloque transversal: mejorar feel y claridad en cada vista. Listado por pantalla 
 - [ ] **Plantillas de respuesta** ("Sí, tenemos disponible", "Pasame tu mail" con un click).
 
 ### Chats (`/dashboard/chats` y `[id]`)
+- [x] **Composer sticky bottom** — `fixed inset-x-0 bottom-0` con backdrop-blur, ya no se pierde al scrollear chats largos (sesión 2026-05-06).
+- [x] **Mensajes agrupados por día** — divisores Hoy / Ayer / "12 de mayo" + hora HH:MM por bubble en lugar de timeAgo repetido (sesión 2026-05-06).
 - [ ] **Búsqueda dentro del hilo** y entre hilos.
 - [ ] **Indicador de leído** (✓ / ✓✓) y "escribiendo…".
 - [ ] **Adjuntos** — foto del lote, análisis PDF, certificado de origen.
 - [ ] **Mensaje de sistema** cuando se cambia el estado del interés ("Vendedor aceptó tu interés").
 - [ ] **Pin a mensaje importante** y/o "convertir mensaje en nota".
 - [ ] **Resumen del hilo** al inicio: lo que se acordó hasta ahora (puede ser AI-generated más adelante).
-- [ ] **Mobile**: composer fijo abajo + lista colapsable estilo WhatsApp.
+- [ ] **Distinción visual seller/buyer** en el listado de chats — chip "Vendiéndole" / "Comprándole" al lado del nombre para contexto rápido.
+- [ ] **Tip al final del listado** ("cuando aceptes un interés...") está flojo — meterlo en card sutil con icono o sacarlo.
 
 ### Notificaciones (`/dashboard/notificaciones`)
-- [ ] **Agrupar por día** ("Hoy", "Ayer", "Esta semana").
-- [ ] **Filtros por tipo** (intereses, mensajes, sistema).
+- [x] **Agrupar por día** — buckets Hoy / Ayer / Esta semana / Más viejas, calculados con `bucketize()` (sesión 2026-05-06).
+- [x] **Filtros por tipo** — chips "Todas / Intereses / Mensajes / Sistema" con count por tipo, vía `?tipo=` (sesión 2026-05-06).
+- [x] **"Marcar todas como leídas"** ahora es un button outline con `<CheckCheck>` icon (antes era text link suelto).
 - [ ] **Acción inline** en cada notificación (aceptar/rechazar interés sin tener que entrar a la otra página).
 - [ ] **Configuración de preferencias** — qué notificar, qué silenciar.
 
@@ -276,8 +288,9 @@ Bloque transversal: mejorar feel y claridad en cada vista. Listado por pantalla 
 - [ ] **Renombrar / reordenar** búsquedas.
 
 ### Precios (`/precios`)
+- [x] **Filtros prolijos** — los dos `<select>` con `.select-campo` (que tiene `width:100%` baked-in) reemplazados por chips horizontales para grano (Todos + 8 granos) y select compacto custom para región (sesión 2026-05-06).
 - [ ] **Sticky header** con grano seleccionado + precio actual + cambio % cuando se hace scroll en el gráfico.
-- [ ] **Toggle de monedas inline** (USD / ARS / UYU) más destacado — hoy está en el panel pero pasa desapercibido.
+- [ ] **Toggle de monedas inline** (USD / ARS / UYU) más destacado — hoy está en el panel pero pasa desapercibido. *(parcial: hay selector global en navbar)*
 - [ ] **Comparar 2-3 granos** sobre el mismo gráfico (multi-line) en vez de uno por vez.
 - [ ] **Anotaciones de eventos** sobre el gráfico ("sequía Pampa húmeda", "guerra Ucrania-Rusia", etc.) — ayuda a leer la curva.
 - [ ] **Min / max histórico** marcados en la línea con tooltips.
@@ -286,10 +299,13 @@ Bloque transversal: mejorar feel y claridad en cada vista. Listado por pantalla 
 - [ ] **Sparklines en color** según tendencia (verde/rojo) y no genéricos.
 - [ ] **Drilldown a publicaciones**: click en un grano → "ver ofertas activas de soja" linkea al marketplace filtrado.
 - [ ] **Mobile**: la tabla de precios necesita scroll horizontal o cards apiladas; revisar con dev tools.
+- [ ] **Refactor de archivo (822 líneas)**: extraer `<PriceChart>`, `<Sparkline>`, `<RangeBar>` a `/components/prices/charts/`.
 
 ### Mapa unificado (`/mapa`) — *Antes `/clima` y `/geografia` separados*
 
 > Fase 1 hecha en sesión 2026-05-05: `/mapa` con selector "Ofertas / Clima" (`?layer=ofertas|clima`) que monta el cliente correspondiente (`<GeoClient>` o `<ClimaClient>`). URLs viejas (`/clima`, `/geografia`) hacen redirect 307. Navbar y MobileNav consolidados a una sola entrada "Mapa".
+
+> Fase 1.5 hecha en sesión 2026-05-06: ambas capas montan siempre, se alternan con `display: none`. Cada capa preserva su zoom/filtros/provincia al volver a ella. (Viewport "compartido" verdadero queda como Fase 2.5.)
 
 **Fase 2 — refactor del shell compartido** (alta prioridad cuando se vuelva a tocar el mapa):
 - [ ] Extraer `<MapShell>` con la geo + zoom + controls + país (AR/UY/...) que ambas capas reusan.
@@ -320,10 +336,22 @@ Bloque transversal: mejorar feel y claridad en cada vista. Listado por pantalla 
 - [ ] **Fix `weather-data.ts:116`**: `"Río Negro"` duplicado AR/UY — namespacearlo.
 
 ### Mi perfil (`/dashboard/perfil`)
-- [ ] **Upload de logo / avatar** (Supabase Storage).
+- [x] **Upload mock con `<label> + <input file>`** — hover muestra overlay dark con icono Upload "Cambiar logo". Aún no persiste a Storage (sesión 2026-05-06).
+- [x] **Sección de verificación accionable** — grid de 3 niveles (Email / Empresa / Verified seller) con done/pending, badge "Nivel actual", CTA "Iniciar verificación CUIT" disabled con texto explicativo (sesión 2026-05-06).
+- [ ] **Cableado real del upload de logo** a Supabase Storage (hoy es solo file picker, no persiste).
 - [ ] **Preview en vivo** de cómo se ve el perfil público mientras se edita.
 - [ ] **Progreso de completitud** ("Tu perfil está 70% completo — sumá X para verificarte").
 - [ ] **Validación de teléfono** vía SMS o WhatsApp.
+
+### Préstamos (`/prestamos`)
+- [x] **Toggle Tomador/Inversor prominente** — promoted a card propia arriba del simulador con label "Soy", iconos `<Wallet>`/`<Coins>`, descripción de rol. La columna derecha solo deja un dot indicador del rol activo (sesión 2026-05-06).
+- [x] **RiskBadge + ScoreBar al design system** — eliminados hex inline (`#4f632f`, `#c97b55`, etc.). Mapeo `RISK_TONE` con clases Tailwind (emerald/amber/orange/rose), consistente con `<HealthDot>` (sesión 2026-05-06).
+- [x] **Trust pills sutiles** — header pasa de 4 cards con border+bg a versión inline dot+texto (sesión 2026-05-06).
+- [ ] **Tooltips Info en mobile** — hoy usan `group-hover` que no funciona en touch. Falta versión click/tap (Floating UI o Radix Popover).
+- [ ] **Sliders nativos estilizados** — `accent-brand-700` funciona pero el thumb webkit es feo. Custom thumb mejora premium feel.
+- [ ] **`RateLine` también al design system** — todavía usa hex inline en el call site (lines 391-398). Refactor pendiente, menor impacto.
+- [ ] **Cableado al detalle de publicación** — desde una pub de USD 200K, click "Necesito financiar esto" → simulator prefilleado con monto+grano.
+- [ ] **Tab nav consistente** — `bg-ink-50 p-1` con activo `bg-white` no matchea el segmented control que usa el resto de la app (`/dashboard/intereses`, `/mapa`). Unificar.
 
 ### Perfil público (`/u/[id]`)
 - [ ] **Botón "Contactar"** directo (depende de auth + chats).
