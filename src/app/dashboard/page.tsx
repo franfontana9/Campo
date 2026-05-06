@@ -9,6 +9,7 @@ import {
   Circle,
   PlusCircle,
   ShoppingBag,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -36,10 +37,33 @@ function getGreeting(): { greeting: string; emoji: string } {
   return { greeting: "Buenas noches", emoji: "🌙" };
 }
 
+/** Intereses recibidos en publicaciones del usuario, pending y con > 24 h
+ *  desde que llegaron — son los que requieren acción YA. */
+function getUrgentReceivedInterests() {
+  const myListingIds = new Set(
+    MOCK_LISTINGS.filter((l) => l.user_id === CURRENT_USER.id).map((l) => l.id),
+  );
+  const URGENT_THRESHOLD_HOURS = 24;
+  const now = Date.now();
+  return MOCK_INTERESTS.filter(
+    (i) => myListingIds.has(i.listing_id) && i.status === "pending",
+  )
+    .filter(
+      (i) =>
+        (now - new Date(i.created_at).getTime()) / (1000 * 60 * 60) >
+        URGENT_THRESHOLD_HOURS,
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    );
+}
+
 export default function DashboardPage() {
   const stats = getUserStats();
   const firstName = CURRENT_USER.full_name.split(" ")[0];
   const { greeting } = getGreeting();
+  const urgentInterests = getUrgentReceivedInterests();
 
   // Checklist dinámico
   const steps = [
@@ -90,6 +114,39 @@ export default function DashboardPage() {
         </p>
       </header>
 
+      {/* Banner de acción — intereses pendientes hace > 24 h */}
+      {urgentInterests.length > 0 && (
+        <section className="mb-8 overflow-hidden rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-50/80 to-amber-50/30 shadow-sm">
+          <div className="flex flex-wrap items-center gap-4 p-5 md:flex-nowrap">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+              <AlertCircle className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-ink-900">
+                {urgentInterests.length === 1
+                  ? "1 interés sin responder"
+                  : `${urgentInterests.length} intereses sin responder`}{" "}
+                <span className="text-ink-600">hace más de 24 h</span>
+              </p>
+              <p className="mt-0.5 text-xs text-ink-600">
+                <span className="font-medium text-ink-800">
+                  {urgentInterests[0].buyer?.full_name ?? "Un comprador"}
+                </span>{" "}
+                espera respuesta hace {timeAgo(urgentInterests[0].created_at)}
+                {urgentInterests.length > 1 &&
+                  ` y otros ${urgentInterests.length - 1} más`}
+                .
+              </p>
+            </div>
+            <Link href="/dashboard/intereses?tipo=recibidos" className="shrink-0">
+              <Button size="sm" className="whitespace-nowrap">
+                Responder ahora <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </section>
+      )}
+
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat
@@ -109,7 +166,7 @@ export default function DashboardPage() {
               : undefined
           }
           empty="Nadie te contactó todavía"
-          href="/dashboard/intereses-recibidos"
+          href="/dashboard/intereses?tipo=recibidos"
         />
         <Stat
           icon={<Send className="h-4 w-4" />}
@@ -121,7 +178,7 @@ export default function DashboardPage() {
               : undefined
           }
           empty="No mostraste interés todavía"
-          href="/dashboard/intereses-enviados"
+          href="/dashboard/intereses?tipo=enviados"
         />
       </div>
 

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import {
   TrendingUp, TrendingDown, Minus, GitCompare,
-  BarChart2, Activity, RefreshCw,
+  BarChart2, Activity, RefreshCw, ChevronDown,
 } from "lucide-react";
 import {
   GRAIN_PRICES,
@@ -458,19 +458,67 @@ export function PricesClient() {
       </div>
 
       {/* ── Filters + Price table ── */}
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <select value={grainFilter} onChange={e => setGrainFilter(e.target.value)}
-          className="select-campo h-9 rounded-lg border border-ink-200 bg-white px-3 pr-8 text-sm text-ink-800">
-          <option value="all">Todos los granos</option>
-          {GRAIN_TYPES.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
-        </select>
-        <select value={regionFilter} onChange={e => setRegionFilter(e.target.value)}
-          className="select-campo h-9 rounded-lg border border-ink-200 bg-white px-3 pr-8 text-sm text-ink-800">
-          <option value="all">Todas las regiones</option>
-          <optgroup label="Argentina">{REGIONS_AR.map(r => <option key={r} value={r}>{r}</option>)}</optgroup>
-          <optgroup label="Uruguay">{REGIONS_UY.map(r => <option key={r} value={r}>{r}</option>)}</optgroup>
-        </select>
-        <span className="text-xs text-ink-400">Hacé clic en un grano para ver el análisis detallado ↓</span>
+      <div className="mb-5 space-y-3">
+        {/* Grano: chips horizontales */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">
+            Grano
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            <FilterChip
+              active={grainFilter === "all"}
+              onClick={() => setGrainFilter("all")}
+            >
+              Todos
+            </FilterChip>
+            {GRAIN_TYPES.map((g) => (
+              <FilterChip
+                key={g.value}
+                active={grainFilter === g.value}
+                onClick={() => setGrainFilter(g.value)}
+              >
+                {g.label}
+              </FilterChip>
+            ))}
+          </div>
+        </div>
+
+        {/* Región: select compacto + hint */}
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">
+            Región
+          </span>
+          <div className="relative">
+            <select
+              value={regionFilter}
+              onChange={(e) => setRegionFilter(e.target.value)}
+              className="h-8 appearance-none rounded-full border border-ink-200 bg-white pl-3.5 pr-9 text-xs font-medium text-ink-700 transition-colors hover:border-brand-400 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/10"
+            >
+              <option value="all">Todas las regiones</option>
+              <optgroup label="Argentina">
+                {REGIONS_AR.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Uruguay">
+                {REGIONS_UY.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+            <ChevronDown
+              aria-hidden
+              className="pointer-events-none absolute right-3 top-1/2 h-3 w-3 -translate-y-1/2 text-ink-400"
+            />
+          </div>
+          <span className="ml-auto hidden text-xs text-ink-400 sm:inline">
+            Hacé clic en un grano para ver el análisis detallado ↓
+          </span>
+        </div>
       </div>
 
       {(() => {
@@ -818,5 +866,30 @@ export function PricesClient() {
         </div>
       </div>
     </div>
+  );
+}
+
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+        active
+          ? "border-brand-700 bg-brand-700 text-white shadow-sm"
+          : "border-ink-200 bg-white text-ink-700 hover:border-brand-400 hover:bg-brand-50/40 hover:text-ink-900"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

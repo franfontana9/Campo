@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Inbox, MessageSquare, Pencil, PlusCircle } from "lucide-react";
+import {
+  ArrowRight,
+  ExternalLink,
+  Inbox,
+  MessageSquare,
+  Pencil,
+  PlusCircle,
+} from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { HealthDot } from "@/components/listings/HealthDot";
@@ -51,11 +58,16 @@ export default async function MisPublicacionesPage({
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-ink-100 pb-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">
-            Mis publicaciones
+            Cuenta
           </p>
           <h1 className="mt-2 font-display text-3xl font-medium tracking-tight text-ink-900">
-            {all.length} {all.length === 1 ? "publicación" : "publicaciones"}
+            Mis publicaciones
           </h1>
+          <p className="mt-2 text-sm text-ink-600">
+            {all.length === 0
+              ? "Cuando publiques una oferta va a aparecer acá."
+              : `${all.length} ${all.length === 1 ? "publicación" : "publicaciones"} en tu cuenta.`}
+          </p>
         </div>
         <Link href="/dashboard/publicaciones/nueva">
           <Button size="md">
@@ -202,19 +214,22 @@ export default async function MisPublicacionesPage({
                   </div>
                 </Link>
 
-                {/* Acciones rápidas — fuera del Link para no anidar enlaces */}
-                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-ink-100 bg-ink-50/40 px-5 py-2.5">
+                {/* Acciones rápidas — fuera del Link para no anidar.
+                    Visibles siempre en touch (sm:opacity-0) y on-hover en desktop. */}
+                <div className="flex items-center justify-end gap-1.5 px-5 pb-3 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
                   <Link
                     href={`/marketplace/${l.id}`}
-                    className="rounded-full px-3 py-1.5 text-xs font-medium text-ink-600 hover:bg-white hover:text-ink-900"
+                    className="inline-flex items-center gap-1 rounded-full border border-transparent px-3 py-1 text-xs font-medium text-ink-500 transition-colors hover:border-ink-200 hover:bg-white hover:text-ink-900"
                   >
+                    <ExternalLink className="h-3 w-3" />
                     Ver pública
                   </Link>
-                  <Link href={`/dashboard/publicaciones/${l.id}/editar`}>
-                    <Button size="sm" variant="outline">
-                      <Pencil className="h-3.5 w-3.5" />
-                      Editar
-                    </Button>
+                  <Link
+                    href={`/dashboard/publicaciones/${l.id}/editar`}
+                    className="inline-flex items-center gap-1 rounded-full border border-transparent px-3 py-1 text-xs font-medium text-ink-500 transition-colors hover:border-ink-200 hover:bg-white hover:text-ink-900"
+                  >
+                    <Pencil className="h-3 w-3" />
+                    Editar
                   </Link>
                 </div>
               </li>

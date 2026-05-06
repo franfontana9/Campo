@@ -116,7 +116,7 @@ export default function ChatsPage() {
         <MapPin className="h-3 w-3" />
         Tip: cuando aceptes un interés en{" "}
         <Link
-          href="/dashboard/intereses-recibidos"
+          href="/dashboard/intereses?tipo=recibidos"
           className="text-brand-700 underline underline-offset-4 hover:text-brand-800"
         >
           intereses recibidos

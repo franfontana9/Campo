@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import {
   Banknote, ShieldCheck, TrendingUp, AlertTriangle,
   ChevronRight, Info, BarChart2, Users, Landmark,
+  Wallet, Coins,
 } from "lucide-react";
 import {
   LOAN_PRODUCTS, RISK_FACTORS, simulate, computeRiskScore,
@@ -12,14 +13,49 @@ import {
 } from "@/lib/loan-data";
 import { Button } from "@/components/ui/Button";
 
+/* ─── Risk styling — alineado con la paleta del design system ────── */
+const RISK_TONE: Record<
+  string,
+  { dot: string; text: string; border: string; bg: string; barFill: string }
+> = {
+  A: {
+    dot: "bg-emerald-500",
+    text: "text-emerald-700",
+    border: "border-emerald-300/60",
+    bg: "bg-emerald-50",
+    barFill: "bg-emerald-500",
+  },
+  B: {
+    dot: "bg-amber-500",
+    text: "text-amber-700",
+    border: "border-amber-300/60",
+    bg: "bg-amber-50",
+    barFill: "bg-amber-500",
+  },
+  C: {
+    dot: "bg-orange-500",
+    text: "text-orange-700",
+    border: "border-orange-300/60",
+    bg: "bg-orange-50",
+    barFill: "bg-orange-500",
+  },
+  D: {
+    dot: "bg-rose-500",
+    text: "text-rose-700",
+    border: "border-rose-300/60",
+    bg: "bg-rose-50",
+    barFill: "bg-rose-500",
+  },
+};
+
 /* ─── Helpers ────────────────────────────────────────────────────── */
-function RiskBadge({ level, label, color }: { level: string; label: string; color: string }) {
+function RiskBadge({ level, label }: { level: string; label: string }) {
+  const t = RISK_TONE[level] ?? RISK_TONE.A;
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold"
-      style={{ borderColor: color + "44", backgroundColor: color + "12", color }}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${t.border} ${t.bg} ${t.text}`}
     >
-      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
+      <span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} />
       {level} · {label}
     </span>
   );
@@ -41,12 +77,19 @@ function Stat({
 
 function ScoreBar({ score, max }: { score: number; max: number }) {
   const pct = Math.min(100, (score / max) * 100);
-  const color = pct >= 75 ? "#4f632f" : pct >= 50 ? "#c97b55" : pct >= 30 ? "#b66240" : "#9b2c2c";
+  const fill =
+    pct >= 75
+      ? RISK_TONE.A.barFill
+      : pct >= 50
+        ? RISK_TONE.B.barFill
+        : pct >= 30
+          ? RISK_TONE.C.barFill
+          : RISK_TONE.D.barFill;
   return (
     <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-ink-100">
       <div
-        className="h-full rounded-full transition-all duration-500"
-        style={{ width: `${pct}%`, backgroundColor: color }}
+        className={`h-full rounded-full transition-all duration-500 ${fill}`}
+        style={{ width: `${pct}%` }}
       />
     </div>
   );
@@ -161,15 +204,18 @@ export function LoansClient() {
           Tasas calculadas según perfil de riesgo crediticio. Sin bancos intermediarios.
         </p>
 
-        {/* Trust pills */}
-        <div className="mt-6 flex flex-wrap gap-3">
+        {/* Trust pills — versión sutil: dot + texto, sin border ni bg */}
+        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] text-ink-600">
           {[
             { icon: <ShieldCheck className="h-3.5 w-3.5" />, text: "Garantía sobre grano físico" },
             { icon: <TrendingUp className="h-3.5 w-3.5" />, text: "Tasas desde 6% anual" },
             { icon: <Landmark className="h-3.5 w-3.5" />, text: "Operaciones en USD" },
             { icon: <Users className="h-3.5 w-3.5" />, text: "Plataforma P2P" },
           ].map(({ icon, text }) => (
-            <span key={text} className="inline-flex items-center gap-1.5 rounded-full border border-ink-200 bg-white px-3 py-1.5 text-xs font-medium text-ink-700">
+            <span
+              key={text}
+              className="inline-flex items-center gap-1.5"
+            >
               <span className="text-brand-700">{icon}</span>
               {text}
             </span>
@@ -178,7 +224,7 @@ export function LoansClient() {
       </header>
 
       {/* Tab nav */}
-      <div className="mb-8 flex gap-1 rounded-xl border border-ink-200 bg-ink-50 p-1 text-sm w-fit">
+      <div className="mb-8 inline-flex items-center gap-1 rounded-xl border border-ink-200 bg-ink-50 p-1 text-sm">
         {(["simulator", "products", "howto"] as const).map((t) => (
           <button
             key={t}
@@ -189,6 +235,59 @@ export function LoansClient() {
           </button>
         ))}
       </div>
+
+      {/* Toggle de rol — Tomador / Inversor (solo aplica al simulator) */}
+      {tab === "simulator" && (
+        <div className="mb-8 overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-sm">
+          <div className="flex flex-wrap items-center gap-3 px-5 py-3">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-500">
+              Soy
+            </span>
+            <div className="flex flex-1 flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setView("borrower")}
+                aria-pressed={view === "borrower"}
+                className={`group inline-flex items-center gap-2.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
+                  view === "borrower"
+                    ? "border-brand-700 bg-brand-700 text-white shadow-sm"
+                    : "border-ink-200 bg-white text-ink-700 hover:border-brand-400 hover:bg-brand-50/40"
+                }`}
+              >
+                <Wallet className="h-4 w-4" />
+                <span className="text-left">
+                  <span className="block">Tomador</span>
+                  <span
+                    className={`block text-[10px] font-normal ${view === "borrower" ? "text-brand-100" : "text-ink-500"}`}
+                  >
+                    Necesito financiamiento
+                  </span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("investor")}
+                aria-pressed={view === "investor"}
+                className={`group inline-flex items-center gap-2.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
+                  view === "investor"
+                    ? "border-brand-700 bg-brand-700 text-white shadow-sm"
+                    : "border-ink-200 bg-white text-ink-700 hover:border-brand-400 hover:bg-brand-50/40"
+                }`}
+              >
+                <Coins className="h-4 w-4" />
+                <span className="text-left">
+                  <span className="block">Inversor</span>
+                  <span
+                    className={`block text-[10px] font-normal ${view === "investor" ? "text-brand-100" : "text-ink-500"}`}
+                  >
+                    Quiero prestar capital
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── SIMULATOR TAB ── */}
       {tab === "simulator" && (
@@ -291,7 +390,7 @@ export function LoansClient() {
             <div className="rounded-2xl border border-ink-100 bg-white p-6">
               <div className="mb-5 flex items-center justify-between">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.13em] text-ink-500">Perfil de riesgo crediticio</p>
-                <RiskBadge level={riskInfo.level} label={riskInfo.label} color={riskInfo.color} />
+                <RiskBadge level={riskInfo.level} label={riskInfo.label} />
               </div>
 
               <div className="mb-4">
@@ -334,20 +433,10 @@ export function LoansClient() {
           {/* RIGHT — Results */}
           <div className="space-y-5">
 
-            {/* View toggle */}
-            <div className="flex gap-1 rounded-xl border border-ink-200 bg-ink-50 p-1 text-sm">
-              <button
-                onClick={() => setView("borrower")}
-                className={`flex-1 rounded-lg px-3 py-2 font-medium transition-colors ${view === "borrower" ? "bg-white text-ink-900 shadow-sm" : "text-ink-500 hover:text-ink-800"}`}
-              >
-                Tomador del crédito
-              </button>
-              <button
-                onClick={() => setView("investor")}
-                className={`flex-1 rounded-lg px-3 py-2 font-medium transition-colors ${view === "investor" ? "bg-white text-ink-900 shadow-sm" : "text-ink-500 hover:text-ink-800"}`}
-              >
-                Oferente de fondos
-              </button>
+            {/* Indicador discreto del rol activo */}
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-600" />
+              Vista de {view === "borrower" ? "tomador" : "inversor"}
             </div>
 
             {/* Summary stats */}

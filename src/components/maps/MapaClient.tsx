@@ -88,9 +88,20 @@ export function MapaClient() {
         </div>
       </div>
 
-      {/* Capa activa */}
-      <div key={active}>
-        {active === "clima" ? <ClimaClient /> : <GeoClient />}
+      {/* Ambas capas montadas — alternamos visibilidad para preservar
+          el estado interno (zoom, filtros, provincia seleccionada) de cada
+          capa al cambiar de tab. */}
+      <div
+        aria-hidden={active !== "ofertas"}
+        style={{ display: active === "ofertas" ? "block" : "none" }}
+      >
+        <GeoClient />
+      </div>
+      <div
+        aria-hidden={active !== "clima"}
+        style={{ display: active === "clima" ? "block" : "none" }}
+      >
+        <ClimaClient />
       </div>
     </div>
   );

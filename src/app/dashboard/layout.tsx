@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   FileText,
   Inbox,
-  Send,
   User,
   PlusCircle,
   MessageSquare,
@@ -11,7 +10,13 @@ import {
   Bookmark,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { MOCK_CHATS, MOCK_NOTIFICATIONS } from "@/lib/mock-data";
+import {
+  CURRENT_USER,
+  MOCK_CHATS,
+  MOCK_INTERESTS,
+  MOCK_LISTINGS,
+  MOCK_NOTIFICATIONS,
+} from "@/lib/mock-data";
 
 export default function DashboardLayout({
   children,
@@ -20,6 +25,16 @@ export default function DashboardLayout({
 }) {
   const unreadChats = MOCK_CHATS.reduce((s, c) => s + c.unread, 0);
   const unreadNotifs = MOCK_NOTIFICATIONS.filter((n) => !n.read).length;
+  // Intereses pendientes (recibidos + enviados) — badge global del sidebar
+  const myListingIds = new Set(
+    MOCK_LISTINGS.filter((l) => l.user_id === CURRENT_USER.id).map((l) => l.id),
+  );
+  const pendingInterests = MOCK_INTERESTS.filter((i) => {
+    if (i.status !== "pending") return false;
+    return (
+      myListingIds.has(i.listing_id) || i.buyer_id === CURRENT_USER.id
+    );
+  }).length;
   return (
     <div className="mx-auto w-full max-w-[1440px] px-6 py-12 lg:px-10">
       <div className="grid gap-10 md:grid-cols-[240px_1fr] xl:gap-14">
@@ -41,16 +56,11 @@ export default function DashboardLayout({
               Mis publicaciones
             </NavItem>
             <NavItem
-              href="/dashboard/intereses-recibidos"
+              href="/dashboard/intereses"
               icon={<Inbox className="h-4 w-4" />}
+              badge={pendingInterests > 0 ? pendingInterests : undefined}
             >
-              Intereses recibidos
-            </NavItem>
-            <NavItem
-              href="/dashboard/intereses-enviados"
-              icon={<Send className="h-4 w-4" />}
-            >
-              Intereses enviados
+              Intereses
             </NavItem>
             <NavItem
               href="/dashboard/busquedas"

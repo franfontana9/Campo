@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Building2, BadgeCheck, ExternalLink, ShieldCheck } from "lucide-react";
+import {
+  Building2,
+  BadgeCheck,
+  ExternalLink,
+  ShieldCheck,
+  Upload,
+  ArrowRight,
+} from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
@@ -33,9 +40,23 @@ export default function PerfilPage() {
       {/* Tarjeta resumen */}
       <section className="mb-8 overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-sm">
         <div className="flex flex-wrap items-start gap-4 p-6">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-700 ring-4 ring-brand-50">
-            <Building2 className="h-7 w-7" />
-          </div>
+          {/* Avatar / logo con upload mock — botón clickeable que abre file picker */}
+          <label
+            htmlFor="logo-upload"
+            className="group relative flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-brand-100 text-brand-700 ring-4 ring-brand-50 transition-all hover:ring-brand-200"
+            title="Cambiar logo"
+          >
+            <Building2 className="h-7 w-7 transition-opacity group-hover:opacity-30" />
+            <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-ink-900/0 text-[10px] font-semibold uppercase tracking-wider text-white opacity-0 transition-all group-hover:bg-ink-900/55 group-hover:opacity-100">
+              <Upload className="h-4 w-4" />
+            </span>
+            <input
+              id="logo-upload"
+              type="file"
+              accept="image/*"
+              className="sr-only"
+            />
+          </label>
           <div className="min-w-0 flex-1">
             <p className="font-display text-2xl font-medium text-ink-900">
               {CURRENT_USER.full_name}
@@ -158,25 +179,98 @@ export default function PerfilPage() {
         </div>
       </form>
 
-      {/* Verificación */}
-      <section className="mt-8 rounded-2xl border border-ink-100 bg-white p-7 shadow-sm">
-        <div className="flex items-start gap-4">
+      {/* Verificación — accionable */}
+      <section className="mt-8 overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-sm">
+        <div className="flex flex-wrap items-start gap-4 p-7">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700">
             <ShieldCheck className="h-5 w-5" />
           </div>
-          <div className="flex-1">
-            <h2 className="font-display text-xl font-medium text-ink-900">
-              Verificación de cuenta
-            </h2>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="font-display text-xl font-medium text-ink-900">
+                Verificación de cuenta
+              </h2>
+              <Badge variant="success">
+                <BadgeCheck className="mr-1 h-3 w-3" />
+                Nivel actual: Verificada
+              </Badge>
+            </div>
             <p className="mt-2 text-sm text-ink-600">
-              Tu cuenta está marcada como <strong>Empresa verificada</strong>{" "}
-              porque tu razón social y contacto fueron revisados manualmente.
-              Próximamente vamos a sumar verificación automática vía CUIT / Tax
-              ID y nivel «Verified seller» según historial de operaciones.
+              Tu razón social y contacto fueron revisados manualmente. El
+              próximo nivel <strong>«Verified seller»</strong> requiere
+              verificación automática vía CUIT / Tax ID e historial de
+              operaciones cerradas.
             </p>
           </div>
         </div>
+        {/* Niveles + CTA */}
+        <div className="grid gap-px bg-ink-100 sm:grid-cols-3">
+          <VerifLevel
+            label="Email verificado"
+            done
+            hint="Confirmaste tu mail al registrarte."
+          />
+          <VerifLevel
+            label="Empresa verificada"
+            done
+            hint="Razón social y contacto chequeados."
+          />
+          <VerifLevel
+            label="Verified seller"
+            done={false}
+            hint="Sumá CUIT y operaciones cerradas."
+          />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ink-100 bg-ink-50/60 px-7 py-4">
+          <p className="text-xs text-ink-600">
+            Próximo paso: integración con AFIP / Tax ID. Te avisamos cuando
+            esté disponible.
+          </p>
+          <Button size="sm" variant="outline" disabled>
+            Iniciar verificación CUIT
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </section>
+    </div>
+  );
+}
+
+function VerifLevel({
+  label,
+  done,
+  hint,
+}: {
+  label: string;
+  done: boolean;
+  hint: string;
+}) {
+  return (
+    <div className="bg-white p-5">
+      <div className="flex items-center gap-2">
+        <span
+          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+            done
+              ? "bg-emerald-100 text-emerald-700"
+              : "bg-ink-100 text-ink-400"
+          }`}
+          aria-hidden
+        >
+          {done ? (
+            <BadgeCheck className="h-3 w-3" />
+          ) : (
+            <span className="h-1.5 w-1.5 rounded-full bg-ink-300" />
+          )}
+        </span>
+        <p
+          className={`text-sm font-medium ${done ? "text-ink-900" : "text-ink-500"}`}
+        >
+          {label}
+        </p>
+      </div>
+      <p className="mt-1.5 text-[11px] leading-relaxed text-ink-500">
+        {hint}
+      </p>
     </div>
   );
 }

@@ -34,7 +34,7 @@ export function InterestForm({ sellerName }: Props) {
       action: {
         label: "Ver enviados",
         onClick: () => {
-          window.location.href = "/dashboard/intereses-enviados";
+          window.location.href = "/dashboard/intereses?tipo=enviados";
         },
       },
     });
