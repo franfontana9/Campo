@@ -113,7 +113,7 @@ const PROVINCE_ZONE: Record<string, string> = {
   "Colonia": "uruguay", "San José": "uruguay", "Flores": "uruguay",
   "Florida": "uruguay", "Durazno": "uruguay", "Tacuarembó": "uruguay",
   "Rivera": "uruguay", "Artigas": "uruguay", "Salto": "uruguay",
-  "Paysandú": "uruguay", "Río Negro": "uruguay", "Soriano": "uruguay",
+  "Paysandú": "uruguay", "Soriano": "uruguay",
   "Rocha": "uruguay", "Lavalleja": "uruguay", "Treinta y Tres": "uruguay",
   "Cerro Largo": "uruguay",
 };

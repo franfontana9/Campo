@@ -18,6 +18,7 @@ import {
   Bell,
   User,
   Bookmark,
+  Gavel,
 } from "lucide-react";
 import { Drawer } from "@/components/ui/Drawer";
 import {
@@ -82,6 +83,13 @@ export function MobileNav() {
             onClick={() => setOpen(false)}
           >
             Préstamos
+          </NavItem>
+          <NavItem
+            href="/subastas"
+            icon={<Gavel className="h-4 w-4" />}
+            onClick={() => setOpen(false)}
+          >
+            Subastas
           </NavItem>
 
           <SectionLabel>Mi panel</SectionLabel>

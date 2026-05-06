@@ -5,6 +5,7 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CurrencyProvider } from "@/components/providers/CurrencyProvider";
+import { CampoAssistant } from "@/components/assistant/CampoAssistant";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -69,6 +70,7 @@ export default function RootLayout({
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
+          <CampoAssistant />
           <Toaster
             position="top-right"
             richColors

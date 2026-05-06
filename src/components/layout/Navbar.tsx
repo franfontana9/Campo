@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Banknote,
   Map as MapIcon,
+  Gavel,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { MobileNav } from "./MobileNav";
@@ -28,6 +29,12 @@ const MORE_LINKS = [
     label: "Préstamos",
     desc: "Simulador y financiamiento agropecuario",
     icon: <Banknote className="h-4 w-4" />,
+  },
+  {
+    href: "/subastas",
+    label: "Subastas",
+    desc: "Remates en vivo de granos físicos",
+    icon: <Gavel className="h-4 w-4" />,
   },
 ];
 
