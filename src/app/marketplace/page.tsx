@@ -11,6 +11,7 @@ import { ListingCard } from "@/components/listings/ListingCard";
 import { ListingFilters } from "@/components/listings/ListingFilters";
 import { ListingFiltersMobile } from "@/components/listings/ListingFiltersMobile";
 import { SaveSearchButton } from "@/components/listings/SaveSearchButton";
+import { SortChips } from "@/components/listings/SortChips";
 import { Reveal } from "@/components/effects/Reveal";
 import { MOCK_LISTINGS, getMarketplaceStats } from "@/lib/mock-data";
 import { countryLabel, GRAIN_TYPES, PRICE_MODES } from "@/lib/constants";
@@ -193,27 +194,33 @@ export default async function MarketplacePage({
                 </span>
               </p>
             </div>
-            {chips.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2">
-                {chips.map((c) => (
-                  <Link
-                    key={c.key}
-                    href={chipHref(sp, c.key)}
-                    className="inline-flex items-center gap-1 rounded-full border border-ink-200 bg-white px-3 py-1 text-xs text-ink-700 transition-colors hover:border-ink-300 hover:bg-ink-50"
-                  >
-                    {c.label}
-                    <X className="h-3 w-3" />
-                  </Link>
-                ))}
-                <Link
-                  href="/marketplace"
-                  className="text-xs text-ink-500 underline underline-offset-4 hover:text-ink-900"
-                >
-                  Limpiar todo
-                </Link>
-              </div>
-            )}
+            <SortChips />
           </div>
+
+          {/* Chips de filtros activos */}
+          {chips.length > 0 && (
+            <div className="mb-6 flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">
+                Filtros activos
+              </span>
+              {chips.map((c) => (
+                <Link
+                  key={c.key}
+                  href={chipHref(sp, c.key)}
+                  className="inline-flex items-center gap-1 rounded-full border border-ink-200 bg-white px-3 py-1 text-xs text-ink-700 transition-colors hover:border-brand-400 hover:bg-brand-50/40"
+                >
+                  {c.label}
+                  <X className="h-3 w-3" />
+                </Link>
+              ))}
+              <Link
+                href="/marketplace"
+                className="text-xs text-ink-500 underline underline-offset-4 hover:text-ink-900"
+              >
+                Limpiar todo
+              </Link>
+            </div>
+          )}
 
           {listings.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-ink-200 bg-white p-14 text-center">

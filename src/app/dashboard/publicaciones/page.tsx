@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Inbox, MessageSquare, Pencil, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { HealthDot } from "@/components/listings/HealthDot";
 import {
   CURRENT_USER,
   MOCK_CHATS,
@@ -13,6 +14,7 @@ import {
   formatDate,
   formatPrice,
   formatTonnage,
+  getListingHealth,
   timeAgo,
 } from "@/lib/utils";
 import { countryLabel, grainLabel, LISTING_STATUSES } from "@/lib/constants";
@@ -119,6 +121,21 @@ export default async function MisPublicacionesPage({
               (c) => c.listing_id === l.id,
             );
             const unread = listingChats.reduce((s, c) => s + c.unread, 0);
+            // Hubo "actividad" si llegó un interés o un mensaje en los últimos 7 días.
+            const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+            const hasActivityInLast7d =
+              listingInterests.some(
+                (i) => new Date(i.created_at).getTime() >= sevenDaysAgo,
+              ) ||
+              listingChats.some(
+                (c) => new Date(c.last_message_at).getTime() >= sevenDaysAgo,
+              );
+            const health = getListingHealth({
+              createdAt: l.created_at,
+              pendingInterests: pending,
+              unreadChats: unread,
+              hasActivityInLast7d,
+            });
             return (
               <li key={l.id} className="group">
                 <Link
@@ -127,6 +144,7 @@ export default async function MisPublicacionesPage({
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
+                      <HealthDot health={health} />
                       <Badge variant="brand">{grainLabel(l.grain_type)}</Badge>
                       <Badge variant={STATUS_VARIANT[l.status]}>
                         {LISTING_STATUSES.find((s) => s.value === l.status)?.label}

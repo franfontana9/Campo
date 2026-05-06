@@ -110,18 +110,6 @@ export function ListingFilters() {
           </Select>
         </Field>
 
-        <Field label="Ordenar" htmlFor="f-sort">
-          <Select
-            id="f-sort"
-            defaultValue={sp.get("sort") ?? "recent"}
-            onChange={(e) => update({ sort: e.target.value })}
-          >
-            <option value="recent">Más recientes</option>
-            <option value="price_asc">Precio ↑</option>
-            <option value="price_desc">Precio ↓</option>
-            <option value="tonnage_desc">Más toneladas</option>
-          </Select>
-        </Field>
       </div>
     </div>
   );

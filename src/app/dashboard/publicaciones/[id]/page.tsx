@@ -18,6 +18,7 @@ import {
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { InterestActions } from "@/components/listings/InterestActions";
+import { HealthDot } from "@/components/listings/HealthDot";
 import {
   CURRENT_USER,
   MOCK_CHATS,
@@ -31,6 +32,7 @@ import {
   formatDate,
   formatPrice,
   formatTonnage,
+  getListingHealth,
   mockInterestsCount,
   timeAgo,
 } from "@/lib/utils";
@@ -88,6 +90,17 @@ export default async function PublicacionDetallePage({
   const totalUnread = chats.reduce((s, c) => s + c.unread, 0);
   const views = mockInterestsCount(listing.id) * 14 + 23; // mock estable
 
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const hasActivityInLast7d =
+    interests.some((i) => new Date(i.created_at).getTime() >= sevenDaysAgo) ||
+    chats.some((c) => new Date(c.last_message_at).getTime() >= sevenDaysAgo);
+  const health = getListingHealth({
+    createdAt: listing.created_at,
+    pendingInterests: pending.length,
+    unreadChats: totalUnread,
+    hasActivityInLast7d,
+  });
+
   const statusMeta = LISTING_STATUSES.find((s) => s.value === listing.status);
 
   return (
@@ -104,6 +117,8 @@ export default async function PublicacionDetallePage({
         <div className="grid gap-6 p-7 lg:grid-cols-[1fr_auto] lg:items-start">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
+              <HealthDot health={health} withLabel />
+              <span className="h-3 w-px bg-ink-200" aria-hidden />
               <Badge variant="brand">{grainLabel(listing.grain_type)}</Badge>
               {statusMeta && (
                 <Badge variant={STATUS_VARIANT[listing.status]}>
@@ -114,6 +129,7 @@ export default async function PublicacionDetallePage({
                 publicada {timeAgo(listing.created_at)}
               </span>
             </div>
+            <p className="mt-1 text-[11px] text-ink-500">{health.hint}</p>
             <h1 className="mt-3 font-display text-3xl font-medium tracking-tight text-ink-900 md:text-4xl">
               {formatTonnage(listing.tonnage)} de{" "}
               <span className="italic">

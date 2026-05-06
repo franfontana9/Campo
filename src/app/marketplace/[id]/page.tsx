@@ -30,6 +30,8 @@ import { ListingCard } from "@/components/listings/ListingCard";
 import { GrainVisual } from "@/components/listings/GrainVisual";
 import { ListingGallery } from "@/components/listings/ListingGallery";
 import { InterestForm } from "@/components/listings/InterestForm";
+import { StickyListingHeader } from "@/components/listings/StickyListingHeader";
+import { PriceCalculator } from "@/components/listings/PriceCalculator";
 import { ReportButton } from "@/components/ui/ReportButton";
 import { getListingGallery, MOCK_QUESTIONS } from "@/lib/mock-data";
 
@@ -74,6 +76,14 @@ export default async function ListingDetailPage({
 
   return (
     <div className="mx-auto w-full max-w-[1440px] px-6 pb-24 pt-10 lg:px-10 lg:pb-10">
+      {/* Sticky header al hacer scroll (desktop only) */}
+      <StickyListingHeader
+        title={`${formatTonnage(listing.tonnage)} de ${grainLabel(listing.grain_type).toLowerCase()} · ${listing.city}`}
+        price={listing.price}
+        currency={listing.currency}
+        priceMode={listing.price_mode}
+      />
+
       {/* Breadcrumb */}
       <nav className="mb-8 flex items-center gap-1.5 text-sm text-ink-500">
         <Link
@@ -366,8 +376,17 @@ export default async function ListingDetailPage({
               </div>
             </div>
 
+            {/* Calculadora de volumen (sólo precio fijo) */}
+            {listing.price_mode === "fixed" && listing.price !== null && (
+              <PriceCalculator
+                pricePerTon={listing.price}
+                totalTonnage={listing.tonnage}
+                fromCurrency={listing.currency}
+              />
+            )}
+
             {/* Formulario de interés */}
-            <div className="border-t border-ink-100 bg-ink-50/60 p-7">
+            <div id="message" className="border-t border-ink-100 bg-ink-50/60 p-7">
               <InterestForm
                 listingId={listing.id}
                 sellerName={listing.seller?.full_name ?? "el vendedor"}

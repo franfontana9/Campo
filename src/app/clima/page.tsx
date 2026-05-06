@@ -1,11 +1,6 @@
-import type { Metadata } from "next";
-import { ClimaClient } from "@/components/weather/ClimaClient";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Clima agrícola · Campo",
-  description: "Pronósticos e históricos climáticos por provincia y región. Temperatura, precipitaciones y condiciones agropecuarias.",
-};
-
+/** Redirect a la vista de mapa unificada con la capa de clima activa. */
 export default function ClimaPage() {
-  return <ClimaClient />;
+  redirect("/mapa?layer=clima");
 }

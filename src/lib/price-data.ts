@@ -14,29 +14,45 @@ export type GrainPrice = {
   history: WeekPrice[]; // 52 weeks, oldest → newest
 };
 
+/* ─── Deterministic PRNG (server/client match → no hydration errors) ── */
+function mkRand(seed: number) {
+  let s = seed;
+  return function (): number {
+    s = (Math.imul(1664525, s) + 1013904223) | 0;
+    return (s >>> 0) / 0xffffffff;
+  };
+}
+
+function hashStr(str: string): number {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
 /* Generate N weeks of price history ending at a reference date */
-function weeks(base: number, volatility: number, n = 52): WeekPrice[] {
+function weeks(grain: string, base: number, volatility: number, n = 52): WeekPrice[] {
+  const rnd = mkRand(hashStr(grain) || 1);
   const result: WeekPrice[] = [];
-  let price = base * (0.88 + Math.random() * 0.08);
+  let price = base * (0.88 + rnd() * 0.08);
   const end = new Date("2026-04-28");
   for (let i = n - 1; i >= 0; i--) {
     const d = new Date(end);
     d.setDate(d.getDate() - i * 7);
     const label = d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" });
     const year = d.getFullYear().toString().slice(2);
-    // Add a slight seasonal trend + random walk
+    // Add a slight seasonal trend + deterministic walk
     const seasonal = Math.sin((d.getMonth() / 12) * 2 * Math.PI) * volatility * 0.5;
-    price = price + (Math.random() - 0.47) * volatility + seasonal * 0.3;
+    price = price + (rnd() - 0.47) * volatility + seasonal * 0.3;
     price = Math.max(price, base * 0.6); // floor at 60% of base
-    const volume = Math.round((base * 80 + Math.random() * base * 120) * 10) / 10;
-    const orders = Math.round(3 + Math.random() * 47);
+    const volume = Math.round((base * 80 + rnd() * base * 120) * 10) / 10;
+    const orders = Math.round(3 + rnd() * 47);
     result.push({ week: label, label: `${label}/${year}`, usd: Math.round(price * 10) / 10, volume, orders });
   }
   return result;
 }
 
 function make(grain: string, label: string, region: string, base: number, vol: number): GrainPrice {
-  const history = weeks(base, vol, 52);
+  const history = weeks(grain, base, vol, 52);
   return {
     grain, label, region,
     lastUSD: history[history.length - 1].usd,

@@ -4,7 +4,6 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { Onboarding } from "@/components/effects/Onboarding";
 import { CurrencyProvider } from "@/components/providers/CurrencyProvider";
 
 const fraunces = Fraunces({
@@ -70,7 +69,6 @@ export default function RootLayout({
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
-          <Onboarding />
           <Toaster
             position="top-right"
             richColors

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, ShoppingBag, LayoutDashboard, PlusCircle, LogIn, UserPlus, TrendingUp, MapPin, Banknote, CloudSun } from "lucide-react";
+import { Menu, ShoppingBag, LayoutDashboard, PlusCircle, LogIn, UserPlus, TrendingUp, Map as MapIcon, Banknote } from "lucide-react";
 import { Drawer } from "@/components/ui/Drawer";
 
 export function MobileNav() {
@@ -19,6 +19,7 @@ export function MobileNav() {
       </button>
       <Drawer open={open} onOpenChange={setOpen} title="Menú" side="right">
         <nav className="flex flex-col p-2">
+          <SectionLabel>Producto</SectionLabel>
           <NavItem
             href="/marketplace"
             icon={<ShoppingBag className="h-4 w-4" />}
@@ -33,12 +34,14 @@ export function MobileNav() {
           >
             Precios
           </NavItem>
+
+          <SectionLabel>Más</SectionLabel>
           <NavItem
-            href="/geografia"
-            icon={<MapPin className="h-4 w-4" />}
+            href="/mapa"
+            icon={<MapIcon className="h-4 w-4" />}
             onClick={() => setOpen(false)}
           >
-            Geografía
+            Mapa
           </NavItem>
           <NavItem
             href="/prestamos"
@@ -47,13 +50,8 @@ export function MobileNav() {
           >
             Préstamos
           </NavItem>
-          <NavItem
-            href="/clima"
-            icon={<CloudSun className="h-4 w-4" />}
-            onClick={() => setOpen(false)}
-          >
-            Clima
-          </NavItem>
+
+          <SectionLabel>Cuenta</SectionLabel>
           <NavItem
             href="/dashboard"
             icon={<LayoutDashboard className="h-4 w-4" />}
@@ -86,6 +84,14 @@ export function MobileNav() {
         </nav>
       </Drawer>
     </>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="mt-3 px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-400 first:mt-1">
+      {children}
+    </p>
   );
 }
 

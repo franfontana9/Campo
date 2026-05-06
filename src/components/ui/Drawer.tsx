@@ -58,14 +58,14 @@ export function Drawer({
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      className={`fixed inset-0 z-50 ${open ? "" : "pointer-events-none"}`}
+      className={`fixed inset-0 z-50 transition-opacity duration-200 ${
+        open ? "opacity-100" : "pointer-events-none opacity-0"
+      }`}
     >
       {/* Backdrop */}
       <div
         onClick={() => onOpenChange(false)}
-        className={`absolute inset-0 bg-ink-900/40 backdrop-blur-sm transition-opacity duration-200 ${
-          open ? "opacity-100" : "opacity-0"
-        }`}
+        className="absolute inset-0 bg-ink-900/40 backdrop-blur-sm"
       />
       {/* Panel */}
       <div

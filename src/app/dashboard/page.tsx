@@ -28,9 +28,18 @@ export const metadata: Metadata = {
   description: "Resumen de tu actividad en Campo.",
 };
 
+function getGreeting(): { greeting: string; emoji: string } {
+  const h = new Date().getHours();
+  if (h < 6) return { greeting: "Buenas noches", emoji: "🌙" };
+  if (h < 13) return { greeting: "Buen día", emoji: "🌅" };
+  if (h < 20) return { greeting: "Buenas tardes", emoji: "☀️" };
+  return { greeting: "Buenas noches", emoji: "🌙" };
+}
+
 export default function DashboardPage() {
   const stats = getUserStats();
   const firstName = CURRENT_USER.full_name.split(" ")[0];
+  const { greeting } = getGreeting();
 
   // Checklist dinámico
   const steps = [
@@ -69,10 +78,15 @@ export default function DashboardPage() {
           Panel
         </p>
         <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-ink-900">
-          Hola, {firstName}
+          {greeting}, <span className="italic text-brand-700">{firstName}</span>
         </h1>
         <p className="mt-2 text-sm text-ink-600">
-          Tu actividad en Campo en un vistazo.
+          {new Date().toLocaleDateString("es-AR", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+          })}{" "}
+          · Tu actividad en Campo en un vistazo.
         </p>
       </header>
 

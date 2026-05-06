@@ -1,11 +1,6 @@
-import type { Metadata } from "next";
-import { GeoClient } from "@/components/geo/GeoClient";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Geografía",
-  description: "Explorá el mapa de Argentina y Uruguay por provincia. Descubrí qué granos y semillas se venden en cada zona.",
-};
-
+/** Redirect a la vista de mapa unificada con la capa de ofertas activa. */
 export default function GeografiaPage() {
-  return <GeoClient />;
+  redirect("/mapa?layer=ofertas");
 }
