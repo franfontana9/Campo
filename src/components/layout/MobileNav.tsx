@@ -2,11 +2,44 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, ShoppingBag, LayoutDashboard, PlusCircle, LogIn, UserPlus, TrendingUp, Map as MapIcon, Banknote } from "lucide-react";
+import {
+  Menu,
+  ShoppingBag,
+  LayoutDashboard,
+  PlusCircle,
+  LogIn,
+  UserPlus,
+  TrendingUp,
+  Map as MapIcon,
+  Banknote,
+  FileText,
+  Inbox,
+  MessageSquare,
+  Bell,
+  User,
+  Bookmark,
+} from "lucide-react";
 import { Drawer } from "@/components/ui/Drawer";
+import {
+  CURRENT_USER,
+  MOCK_CHATS,
+  MOCK_INTERESTS,
+  MOCK_LISTINGS,
+  MOCK_NOTIFICATIONS,
+} from "@/lib/mock-data";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
+  // Badges
+  const unreadChats = MOCK_CHATS.reduce((s, c) => s + c.unread, 0);
+  const unreadNotifs = MOCK_NOTIFICATIONS.filter((n) => !n.read).length;
+  const myListingIds = new Set(
+    MOCK_LISTINGS.filter((l) => l.user_id === CURRENT_USER.id).map((l) => l.id),
+  );
+  const pendingInterests = MOCK_INTERESTS.filter((i) => {
+    if (i.status !== "pending") return false;
+    return myListingIds.has(i.listing_id) || i.buyer_id === CURRENT_USER.id;
+  }).length;
   return (
     <>
       <button
@@ -51,14 +84,61 @@ export function MobileNav() {
             Préstamos
           </NavItem>
 
-          <SectionLabel>Cuenta</SectionLabel>
+          <SectionLabel>Mi panel</SectionLabel>
           <NavItem
             href="/dashboard"
             icon={<LayoutDashboard className="h-4 w-4" />}
             onClick={() => setOpen(false)}
           >
-            Mi panel
+            Resumen
           </NavItem>
+          <NavItem
+            href="/dashboard/publicaciones"
+            icon={<FileText className="h-4 w-4" />}
+            onClick={() => setOpen(false)}
+          >
+            Mis publicaciones
+          </NavItem>
+          <NavItem
+            href="/dashboard/intereses"
+            icon={<Inbox className="h-4 w-4" />}
+            badge={pendingInterests > 0 ? pendingInterests : undefined}
+            onClick={() => setOpen(false)}
+          >
+            Intereses
+          </NavItem>
+          <NavItem
+            href="/dashboard/busquedas"
+            icon={<Bookmark className="h-4 w-4" />}
+            onClick={() => setOpen(false)}
+          >
+            Búsquedas guardadas
+          </NavItem>
+          <NavItem
+            href="/dashboard/chats"
+            icon={<MessageSquare className="h-4 w-4" />}
+            badge={unreadChats > 0 ? unreadChats : undefined}
+            onClick={() => setOpen(false)}
+          >
+            Chats
+          </NavItem>
+          <NavItem
+            href="/dashboard/notificaciones"
+            icon={<Bell className="h-4 w-4" />}
+            badge={unreadNotifs > 0 ? unreadNotifs : undefined}
+            onClick={() => setOpen(false)}
+          >
+            Notificaciones
+          </NavItem>
+          <NavItem
+            href="/dashboard/perfil"
+            icon={<User className="h-4 w-4" />}
+            onClick={() => setOpen(false)}
+          >
+            Mi perfil
+          </NavItem>
+
+          <SectionLabel>Acciones</SectionLabel>
           <NavItem
             href="/dashboard/publicaciones/nueva"
             icon={<PlusCircle className="h-4 w-4" />}
@@ -66,6 +146,7 @@ export function MobileNav() {
           >
             Publicar oferta
           </NavItem>
+
           <div className="my-3 border-t border-ink-100" />
           <NavItem
             href="/login"
@@ -100,11 +181,13 @@ function NavItem({
   icon,
   children,
   onClick,
+  badge,
 }: {
   href: string;
   icon: React.ReactNode;
   children: React.ReactNode;
   onClick?: () => void;
+  badge?: number;
 }) {
   return (
     <Link
@@ -113,7 +196,12 @@ function NavItem({
       className="flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] text-ink-800 transition-colors hover:bg-ink-50 hover:text-ink-900"
     >
       <span className="text-ink-400">{icon}</span>
-      {children}
+      <span className="flex-1">{children}</span>
+      {badge !== undefined && badge > 0 && (
+        <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand-700 px-1.5 text-[10px] font-semibold text-white">
+          {badge}
+        </span>
+      )}
     </Link>
   );
 }

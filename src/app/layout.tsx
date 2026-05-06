@@ -46,13 +46,13 @@ export const metadata: Metadata = {
     siteName: "Campo",
     title: "Campo · Marketplace global de granos",
     description:
-      "Publicá y descubrí ofertas de granos físicos. Sin corredores, sin comisiones.",
+      "Publicá y descubrí ofertas de granos físicos. Vendedores verificados, alcance global.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Campo · Marketplace global de granos",
     description:
-      "Publicá y descubrí ofertas de granos físicos. Sin corredores, sin comisiones.",
+      "Publicá y descubrí ofertas de granos físicos. Vendedores verificados, alcance global.",
   },
 };
 

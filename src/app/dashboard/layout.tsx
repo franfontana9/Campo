@@ -37,8 +37,10 @@ export default function DashboardLayout({
   }).length;
   return (
     <div className="mx-auto w-full max-w-[1440px] px-6 py-12 lg:px-10">
-      <div className="grid gap-10 md:grid-cols-[240px_1fr] xl:gap-14">
-        <aside className="md:sticky md:top-24 md:self-start">
+      <div className="md:grid md:gap-10 md:grid-cols-[240px_1fr] xl:gap-14">
+        {/* Sidebar — desktop only. En mobile, la nav del dashboard se accede
+            desde el MobileNav del header (sección "Mi panel"). */}
+        <aside className="hidden md:block md:sticky md:top-24 md:self-start">
           <p className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">
             Mi cuenta
           </p>
